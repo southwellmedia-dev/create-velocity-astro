@@ -22,6 +22,7 @@ ${pc.bold('Options:')}
   --demo          Include demo landing page and sample content
   --components    Include UI component library
   --i18n          Add internationalization support
+  --pages         Prompt for starter pages to generate
   --yes, -y       Skip prompts and use defaults
   --help, -h      Show this help message
   --version, -v   Show version number
@@ -29,15 +30,15 @@ ${pc.bold('Options:')}
 ${pc.bold('Examples:')}
   npm create velocity-astro@latest my-site
   npm create velocity-astro@latest my-site --demo --components
-  npm create velocity-astro@latest my-site --i18n
+  npm create velocity-astro@latest my-site --i18n --pages
   pnpm create velocity-astro my-site -y
 `;
 
-const VERSION = '1.0.3';
+const VERSION = '1.1.0';
 
 export async function run(argv: string[]): Promise<void> {
   const args = mri<CliOptions>(argv, {
-    boolean: ['demo', 'components', 'i18n', 'help', 'version', 'yes'],
+    boolean: ['demo', 'components', 'i18n', 'pages', 'help', 'version', 'yes'],
     alias: {
       h: 'help',
       v: 'version',
@@ -78,6 +79,8 @@ export async function run(argv: string[]): Promise<void> {
       demo: args.demo || false,
       components: args.components !== false, // Default to true
       i18n: args.i18n || false,
+      pages: [],
+      pageLayout: 'page',
       packageManager: 'pnpm',
     });
 
@@ -91,6 +94,7 @@ export async function run(argv: string[]): Promise<void> {
     demo: args.demo,
     components: args.components,
     i18n: args.i18n,
+    pages: args.pages,
   });
 
   // User cancelled
@@ -98,7 +102,7 @@ export async function run(argv: string[]): Promise<void> {
     return;
   }
 
-  const { projectName, demo, components, i18n, packageManager } = answers;
+  const { projectName, demo, components, i18n, pages, pageLayout, packageManager } = answers;
   const targetDir = resolve(process.cwd(), projectName);
 
   // Check if directory exists and is not empty
@@ -122,6 +126,8 @@ export async function run(argv: string[]): Promise<void> {
       demo,
       components,
       i18n,
+      pages,
+      pageLayout,
       packageManager,
     });
 

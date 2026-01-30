@@ -8,6 +8,7 @@ import { getI18nTemplatePath, getBaseTemplatePath } from './template.js';
 import { getInstallCommand } from './utils/package-manager.js';
 import { initGit } from './utils/git.js';
 import { showSuccess, showWarning } from './prompts.js';
+import { generatePages } from './features/pages.js';
 
 // GitHub repository for the Velocity template
 const TEMPLATE_REPO = 'github:southwellmedia-dev/velocity';
@@ -136,7 +137,7 @@ function createContentDirectories(targetDir: string): void {
  * Main scaffold function
  */
 export async function scaffold(options: ScaffoldOptions): Promise<void> {
-  const { projectName, targetDir, demo, components, i18n, packageManager } = options;
+  const { projectName, targetDir, demo, components, i18n, pages, pageLayout, packageManager } = options;
   const spinner = p.spinner();
 
   // Step 1: Download base template from GitHub
@@ -184,7 +185,19 @@ export async function scaffold(options: ScaffoldOptions): Promise<void> {
     }
   }
 
-  // Step 5: Update package.json
+  // Step 5: Generate starter pages if requested
+  if (pages.length > 0) {
+    spinner.start(`Generating ${pages.length} starter page${pages.length > 1 ? 's' : ''}...`);
+    try {
+      const generatedFiles = await generatePages(targetDir, pages, pageLayout, i18n);
+      spinner.stop(`Generated ${generatedFiles.length} page file${generatedFiles.length > 1 ? 's' : ''}`);
+    } catch (error) {
+      spinner.stop('Failed to generate pages');
+      throw error;
+    }
+  }
+
+  // Step 6: Update package.json
   spinner.start('Configuring project...');
   try {
     updatePackageJson(targetDir, projectName);
@@ -194,7 +207,7 @@ export async function scaffold(options: ScaffoldOptions): Promise<void> {
     throw error;
   }
 
-  // Step 6: Initialize git
+  // Step 7: Initialize git
   spinner.start('Initializing git repository...');
   const gitInitialized = await initGit(targetDir);
   if (gitInitialized) {
@@ -203,7 +216,7 @@ export async function scaffold(options: ScaffoldOptions): Promise<void> {
     spinner.stop('Git not available, skipping');
   }
 
-  // Step 7: Install dependencies
+  // Step 8: Install dependencies
   spinner.start(`Installing dependencies with ${packageManager}...`);
   try {
     const installCmd = getInstallCommand(packageManager);

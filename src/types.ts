@@ -3,10 +3,13 @@ export interface CliOptions {
   demo?: boolean;
   components?: boolean;
   i18n?: boolean;
+  pages?: boolean;
   help?: boolean;
   version?: boolean;
   yes?: boolean;
 }
+
+export type PageLayout = 'page' | 'landing';
 
 export interface ScaffoldOptions {
   projectName: string;
@@ -14,6 +17,8 @@ export interface ScaffoldOptions {
   demo: boolean;
   components: boolean;
   i18n: boolean;
+  pages: string[];
+  pageLayout: PageLayout;
   packageManager: PackageManager;
 }
 
@@ -24,5 +29,7 @@ export interface PromptAnswers {
   demo: boolean;
   components: boolean;
   i18n: boolean;
+  pages: string[];
+  pageLayout: PageLayout;
   packageManager: PackageManager;
 }

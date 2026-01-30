@@ -1,6 +1,6 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
-import type { PackageManager, PromptAnswers } from './types.js';
+import type { PackageManager, PageLayout, PromptAnswers } from './types.js';
 import { validateProjectName, toValidProjectName } from './utils/validate.js';
 import { detectPackageManager } from './utils/package-manager.js';
 
@@ -9,6 +9,21 @@ interface PromptDefaults {
   demo?: boolean;
   components?: boolean;
   i18n?: boolean;
+  pages?: boolean;
+}
+
+/**
+ * Parses comma-separated page names into an array of valid page slugs
+ */
+function parsePageNames(input: string): string[] {
+  if (!input.trim()) return [];
+
+  return input
+    .split(',')
+    .map((name) => name.trim().toLowerCase())
+    .filter((name) => name.length > 0)
+    .map((name) => name.replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''))
+    .filter((name) => name.length > 0 && !['index', 'blog', '404', 'rss'].includes(name));
 }
 
 export async function runPrompts(defaults: PromptDefaults = {}): Promise<PromptAnswers | symbol> {
@@ -91,6 +106,61 @@ export async function runPrompts(defaults: PromptDefaults = {}): Promise<PromptA
                 initialValue: false,
               }),
 
+      generatePages:
+        defaults.pages !== undefined
+          ? () => Promise.resolve(defaults.pages)
+          : () =>
+              p.select({
+                message: 'Generate starter pages?',
+                options: [
+                  {
+                    value: false,
+                    label: 'No',
+                    hint: 'Create pages manually later',
+                  },
+                  {
+                    value: true,
+                    label: 'Yes',
+                    hint: 'Auto-generate page files with layout',
+                  },
+                ],
+                initialValue: false,
+              }),
+
+      pageNames: ({ results }) =>
+        results.generatePages
+          ? p.text({
+              message: 'Enter page names (comma-separated):',
+              placeholder: 'about, pricing, faq, contact',
+              validate: (value) => {
+                const pages = parsePageNames(value);
+                if (pages.length === 0) {
+                  return 'Please enter at least one valid page name';
+                }
+              },
+            })
+          : Promise.resolve(''),
+
+      pageLayout: ({ results }) =>
+        results.generatePages
+          ? p.select({
+              message: 'Select layout for pages:',
+              options: [
+                {
+                  value: 'page' as PageLayout,
+                  label: 'PageLayout',
+                  hint: 'Standard content pages (Header + Footer)',
+                },
+                {
+                  value: 'landing' as PageLayout,
+                  label: 'LandingLayout',
+                  hint: 'Marketing pages (Navbar + LandingFooter)',
+                },
+              ],
+              initialValue: 'page' as PageLayout,
+            })
+          : Promise.resolve('page' as PageLayout),
+
       packageManager: () =>
         p.select({
           message: 'Which package manager?',
@@ -132,6 +202,8 @@ export async function runPrompts(defaults: PromptDefaults = {}): Promise<PromptA
     demo: answers.demo as boolean,
     components: answers.components as boolean,
     i18n: answers.i18n as boolean,
+    pages: parsePageNames(answers.pageNames as string),
+    pageLayout: (answers.pageLayout as PageLayout) || 'page',
     packageManager: answers.packageManager as PackageManager,
   };
 }
