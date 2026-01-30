@@ -1,0 +1,717 @@
+---
+/**
+ * Components page - Default locale (English)
+ * Showcases Velocity's UI component library with i18n support
+ */
+import LandingLayout from '@/layouts/LandingLayout.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Button from '@/components/ui/Button.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Alert from '@/components/ui/Alert.astro';
+import Tabs from '@/components/ui/Tabs.astro';
+import Dropdown from '@/components/ui/Dropdown.astro';
+import Dialog from '@/components/ui/Dialog.astro';
+import Tooltip from '@/components/ui/Tooltip.astro';
+import Avatar from '@/components/ui/Avatar.astro';
+import Skeleton from '@/components/ui/Skeleton.astro';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Select } from '@/components/ui/Select';
+import { Checkbox } from '@/components/ui/Checkbox';
+import { Radio } from '@/components/ui/Radio';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
+import { defaultLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/index';
+
+const locale = defaultLocale;
+const t = useTranslations(locale);
+
+// Component categories for navigation
+const categories = [
+  { id: 'buttons', label: t('components.categories.buttons'), icon: 'box' },
+  { id: 'inputs', label: t('components.categories.inputs'), icon: 'terminal' },
+  { id: 'feedback', label: t('components.categories.feedback'), icon: 'alert-circle' },
+  { id: 'overlays', label: t('components.categories.overlays'), icon: 'layers' },
+  { id: 'data', label: t('components.categories.data'), icon: 'layout' },
+  { id: 'loading', label: t('components.categories.loading'), icon: 'loader' },
+];
+---
+
+<LandingLayout
+  title={t('components.meta.title')}
+  description={t('components.meta.description')}
+  lang={locale}
+>
+
+  <!-- Hero Section -->
+  <section class="relative pt-32 pb-20 overflow-hidden">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 bg-grid-pattern [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none opacity-30"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-brand-500/8 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-6xl px-6">
+      <div class="max-w-2xl">
+        <!-- Badge -->
+        <div class="mb-6 inline-flex items-center rounded-full border border-border bg-background px-3 py-1 shadow-sm">
+          <span class="flex h-2 w-2 rounded-full bg-brand-500 mr-2 animate-pulse"></span>
+          <span class="text-xs font-medium text-foreground-secondary">{t('components.hero.badge')}</span>
+        </div>
+
+        <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
+          {t('components.hero.title')} <span class="text-brand-500">{t('components.hero.titleHighlight')}</span>
+        </h1>
+
+        <p class="text-lg text-foreground-muted max-w-xl mb-8 leading-relaxed">
+          {t('components.hero.description')}
+        </p>
+
+        <div class="flex items-center gap-4">
+          <Button href="#buttons">
+            {t('components.hero.browseComponents')}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+          <Button variant="outline" href="https://github.com/southwellmedia-dev/velocity" target="_blank">
+            <Icon name="github" size="sm" />
+            {t('components.hero.viewSource')}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Navigation -->
+  <nav class="sticky top-16 z-40 bg-background/95 backdrop-blur-md border-y border-border">
+    <div class="mx-auto max-w-6xl px-6">
+      <div class="flex items-center gap-1 py-3 overflow-x-auto scrollbar-hide">
+        {categories.map((cat) => (
+          <a
+            href={`#${cat.id}`}
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-secondary rounded-md transition-all whitespace-nowrap group"
+          >
+            <Icon name={cat.icon as any} size="sm" class="text-foreground-subtle group-hover:text-brand-500 transition-colors" />
+            {cat.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Components Showcase -->
+  <div class="mx-auto max-w-6xl px-6 py-20 space-y-32">
+
+    <!-- Buttons Section -->
+    <section id="buttons" class="scroll-mt-32">
+      <div class="flex items-start gap-5 mb-10">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-brand-500/10 text-brand-500 shrink-0">
+          <Icon name="box" size="lg" />
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-bold text-foreground">{t('components.sections.buttons.title')}</h2>
+          <p class="text-foreground-muted mt-1">{t('components.sections.buttons.description')}</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Button Variants -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.buttons.variants')}</span>
+            <span class="showcase-hint">{t('components.sections.buttons.variantsHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="flex flex-wrap items-center gap-3">
+              <Button variant="primary">{t('components.sections.buttons.primary')}</Button>
+              <Button variant="secondary">{t('components.sections.buttons.secondary')}</Button>
+              <Button variant="outline">{t('components.sections.buttons.outline')}</Button>
+              <Button variant="ghost">{t('components.sections.buttons.ghost')}</Button>
+              <Button variant="link">{t('components.sections.buttons.link')}</Button>
+              <Button variant="destructive">{t('components.sections.buttons.destructive')}</Button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Button Sizes -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.buttons.sizes')}</span>
+            <span class="showcase-hint">{t('components.sections.buttons.sizesHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="flex flex-wrap items-end gap-3">
+              <Button size="sm">{t('components.sections.buttons.small')}</Button>
+              <Button size="md">{t('components.sections.buttons.medium')}</Button>
+              <Button size="lg">{t('components.sections.buttons.large')}</Button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Button States & Icons -->
+        <div class="grid gap-6 lg:grid-cols-2">
+          <div class="component-showcase">
+            <div class="showcase-header">
+              <span class="showcase-label">{t('components.sections.buttons.states')}</span>
+            </div>
+            <div class="showcase-content">
+              <div class="flex flex-wrap items-center gap-3">
+                <Button>{t('components.sections.buttons.default')}</Button>
+                <Button loading>{t('components.sections.buttons.loading')}</Button>
+                <Button disabled>{t('components.sections.buttons.disabled')}</Button>
+                <Button icon><Icon name="plus" /></Button>
+              </div>
+            </div>
+          </div>
+
+          <div class="component-showcase">
+            <div class="showcase-header">
+              <span class="showcase-label">{t('components.sections.buttons.withIcons')}</span>
+            </div>
+            <div class="showcase-content">
+              <div class="flex flex-wrap items-center gap-3">
+                <Button><Icon name="mail" size="sm" /> {t('components.sections.buttons.send')}</Button>
+                <Button variant="outline"><Icon name="download" size="sm" /> {t('components.sections.buttons.export')}</Button>
+                <Button variant="ghost"><Icon name="star" size="sm" /> {t('components.sections.buttons.star')}</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Form Inputs Section -->
+    <section id="inputs" class="scroll-mt-32">
+      <div class="flex items-start gap-5 mb-10">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-brand-500/10 text-brand-500 shrink-0">
+          <Icon name="terminal" size="lg" />
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-bold text-foreground">{t('components.sections.inputs.title')}</h2>
+          <p class="text-foreground-muted mt-1">{t('components.sections.inputs.description')}</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="grid gap-6 lg:grid-cols-2">
+          <!-- Text Input -->
+          <div class="component-showcase">
+            <div class="showcase-header">
+              <span class="showcase-label">{t('components.sections.inputs.textInput')}</span>
+              <span class="showcase-hint">{t('components.sections.inputs.textInputHint')}</span>
+            </div>
+            <div class="showcase-content space-y-5">
+              <Input client:visible label={t('components.sections.inputs.emailLabel')} type="email" placeholder={t('components.sections.inputs.emailPlaceholder')} />
+              <Input client:visible label={t('components.sections.inputs.passwordLabel')} type="password" placeholder={t('components.sections.inputs.passwordPlaceholder')} hint={t('components.sections.inputs.passwordHint')} />
+              <Input client:visible label={t('components.sections.inputs.disabledLabel')} placeholder={t('components.sections.inputs.disabledPlaceholder')} disabled />
+            </div>
+          </div>
+
+          <!-- Textarea -->
+          <div class="component-showcase">
+            <div class="showcase-header">
+              <span class="showcase-label">{t('components.sections.inputs.textarea')}</span>
+              <span class="showcase-hint">{t('components.sections.inputs.textareaHint')}</span>
+            </div>
+            <div class="showcase-content">
+              <Textarea client:visible label={t('components.sections.inputs.messageLabel')} placeholder={t('components.sections.inputs.messagePlaceholder')} rows={5} hint={t('components.sections.inputs.messageHint')} />
+            </div>
+          </div>
+
+          <!-- Select -->
+          <div class="component-showcase">
+            <div class="showcase-header">
+              <span class="showcase-label">{t('components.sections.inputs.select')}</span>
+              <span class="showcase-hint">{t('components.sections.inputs.selectHint')}</span>
+            </div>
+            <div class="showcase-content">
+              <Select client:visible label={t('components.sections.inputs.countryLabel')} options={[
+                { value: '', label: t('components.sections.inputs.selectCountry') },
+                { value: 'us', label: 'United States' },
+                { value: 'uk', label: 'United Kingdom' },
+                { value: 'ca', label: 'Canada' },
+                { value: 'de', label: 'Germany' },
+                { value: 'fr', label: 'France' },
+              ]} />
+            </div>
+          </div>
+
+          <!-- Checkboxes -->
+          <div class="component-showcase">
+            <div class="showcase-header">
+              <span class="showcase-label">{t('components.sections.inputs.checkboxes')}</span>
+              <span class="showcase-hint">{t('components.sections.inputs.checkboxesHint')}</span>
+            </div>
+            <div class="showcase-content space-y-4">
+              <Checkbox client:visible label={t('components.sections.inputs.termsLabel')} />
+              <Checkbox client:visible label={t('components.sections.inputs.updatesLabel')} defaultChecked />
+              <Checkbox client:visible label={t('components.sections.inputs.notificationsLabel')} description={t('components.sections.inputs.notificationsDesc')} />
+            </div>
+          </div>
+        </div>
+
+        <!-- Radio Cards - Full width -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.inputs.planSelection')}</span>
+            <span class="showcase-hint">{t('components.sections.inputs.planSelectionHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="grid gap-4 sm:grid-cols-3">
+              <Radio client:visible variant="card" name="plan-cards" value="free" label={t('components.sections.inputs.planFree')} description={t('components.sections.inputs.planFreeDesc')} defaultChecked />
+              <Radio client:visible variant="card" name="plan-cards" value="pro" label={t('components.sections.inputs.planPro')} description={t('components.sections.inputs.planProDesc')} />
+              <Radio client:visible variant="card" name="plan-cards" value="team" label={t('components.sections.inputs.planTeam')} description={t('components.sections.inputs.planTeamDesc')} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="feedback" class="scroll-mt-32">
+      <div class="flex items-start gap-5 mb-10">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-brand-500/10 text-brand-500 shrink-0">
+          <Icon name="alert-circle" size="lg" />
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-bold text-foreground">{t('components.sections.feedback.title')}</h2>
+          <p class="text-foreground-muted mt-1">{t('components.sections.feedback.description')}</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Badges -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.feedback.badges')}</span>
+            <span class="showcase-hint">{t('components.sections.feedback.badgesHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="flex flex-wrap items-center gap-3">
+              <Badge>{t('components.sections.feedback.default')}</Badge>
+              <Badge variant="success">
+                <Icon name="check" size="xs" />
+                {t('components.sections.feedback.success')}
+              </Badge>
+              <Badge variant="warning">
+                <Icon name="alert-triangle" size="xs" />
+                {t('components.sections.feedback.warning')}
+              </Badge>
+              <Badge variant="error">
+                <Icon name="x-circle" size="xs" />
+                {t('components.sections.feedback.error')}
+              </Badge>
+              <Badge variant="info">
+                <Icon name="info" size="xs" />
+                {t('components.sections.feedback.info')}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.feedback.alerts')}</span>
+            <span class="showcase-hint">{t('components.sections.feedback.alertsHint')}</span>
+          </div>
+          <div class="showcase-content space-y-4">
+            <Alert variant="info" title={t('components.sections.feedback.tipTitle')}>
+              {t('components.sections.feedback.tipContent')} <kbd class="px-1.5 py-0.5 text-xs font-mono bg-background-secondary rounded border border-border">{t('components.sections.feedback.tipKey')}</kbd> {t('components.sections.feedback.tipEnd')}
+            </Alert>
+            <Alert variant="success" title={t('components.sections.feedback.deployTitle')}>
+              {t('components.sections.feedback.deployContent')} <a href="#" class="underline underline-offset-2 hover:text-inherit/80">velocity.dev</a>
+            </Alert>
+            <Alert variant="warning" title={t('components.sections.feedback.limitTitle')}>
+              {t('components.sections.feedback.limitContent')}
+            </Alert>
+            <Alert variant="error" title={t('components.sections.feedback.buildTitle')} dismissible>
+              {t('components.sections.feedback.buildContent')} <code class="text-xs font-mono">src/components/Button.tsx</code> {t('components.sections.feedback.buildError')}
+            </Alert>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overlays Section -->
+    <section id="overlays" class="scroll-mt-32">
+      <div class="flex items-start gap-5 mb-10">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-brand-500/10 text-brand-500 shrink-0">
+          <Icon name="layers" size="lg" />
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-bold text-foreground">{t('components.sections.overlays.title')}</h2>
+          <p class="text-foreground-muted mt-1">{t('components.sections.overlays.description')}</p>
+        </div>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <!-- Dialog -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.overlays.dialog')}</span>
+            <span class="showcase-hint">{t('components.sections.overlays.dialogHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <Button onclick="openDialog('demo-dialog')">
+              <Icon name="external-link" size="sm" />
+              {t('components.sections.overlays.openDialog')}
+            </Button>
+
+            <Dialog id="demo-dialog" title={t('components.sections.overlays.deleteTitle')} description={t('components.sections.overlays.deleteDesc')}>
+              <p class="text-foreground-muted text-sm">
+                {t('components.sections.overlays.deleteConfirm')} <strong class="text-foreground">velocity-demo</strong>? {t('components.sections.overlays.deleteWarning')}
+              </p>
+              <div class="flex justify-end gap-3 pt-6">
+                <Button variant="outline" onclick="closeDialog('demo-dialog')">{t('components.sections.overlays.cancel')}</Button>
+                <Button variant="destructive" onclick="closeDialog('demo-dialog')">
+                  <Icon name="x" size="sm" />
+                  {t('components.sections.overlays.deleteProject')}
+                </Button>
+              </div>
+            </Dialog>
+          </div>
+        </div>
+
+        <!-- Dropdown -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.overlays.dropdown')}</span>
+            <span class="showcase-hint">{t('components.sections.overlays.dropdownHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <Dropdown
+              items={[
+                { label: t('components.sections.overlays.edit'), href: '#', icon: 'edit' },
+                { label: t('components.sections.overlays.duplicate'), href: '#', icon: 'copy' },
+                { label: t('components.sections.overlays.share'), href: '#', icon: 'share' },
+                { separator: true, label: '' },
+                { label: t('components.sections.overlays.archive'), href: '#', icon: 'archive' },
+                { label: t('components.sections.overlays.delete'), href: '#', disabled: true, icon: 'trash' },
+              ]}
+            >
+              <Button variant="outline" slot="trigger">
+                {t('components.sections.overlays.actions')}
+                <Icon name="chevron-down" size="sm" />
+              </Button>
+            </Dropdown>
+          </div>
+        </div>
+
+        <!-- Tooltips -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.overlays.tooltips')}</span>
+            <span class="showcase-hint">{t('components.sections.overlays.tooltipsHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="flex flex-wrap items-center gap-4">
+              <Tooltip content={t('components.sections.overlays.tooltipTop')} position="top">
+                <Button variant="outline" size="sm">{t('components.sections.overlays.top')}</Button>
+              </Tooltip>
+              <Tooltip content={t('components.sections.overlays.tooltipBottom')} position="bottom">
+                <Button variant="outline" size="sm">{t('components.sections.overlays.bottom')}</Button>
+              </Tooltip>
+              <Tooltip content={t('components.sections.overlays.tooltipLeft')} position="left">
+                <Button variant="outline" size="sm">{t('components.sections.overlays.left')}</Button>
+              </Tooltip>
+              <Tooltip content={t('components.sections.overlays.tooltipRight')} position="right">
+                <Button variant="outline" size="sm">{t('components.sections.overlays.right')}</Button>
+              </Tooltip>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.overlays.tabs')}</span>
+            <span class="showcase-hint">{t('components.sections.overlays.tabsHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <Tabs
+              tabs={[
+                { id: 'overview', label: t('components.sections.overlays.overview') },
+                { id: 'analytics', label: t('components.sections.overlays.analytics') },
+                { id: 'settings', label: t('components.sections.overlays.settings') },
+              ]}
+            >
+              <div data-tab-content="overview" class="text-sm text-foreground-muted">
+                <p>{t('components.sections.overlays.overviewContent')}</p>
+              </div>
+              <div data-tab-content="analytics" class="text-sm text-foreground-muted">
+                <p>{t('components.sections.overlays.analyticsContent')}</p>
+              </div>
+              <div data-tab-content="settings" class="text-sm text-foreground-muted">
+                <p>{t('components.sections.overlays.settingsContent')}</p>
+              </div>
+            </Tabs>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Display Section -->
+    <section id="data" class="scroll-mt-32">
+      <div class="flex items-start gap-5 mb-10">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-brand-500/10 text-brand-500 shrink-0">
+          <Icon name="layout" size="lg" />
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-bold text-foreground">{t('components.sections.data.title')}</h2>
+          <p class="text-foreground-muted mt-1">{t('components.sections.data.description')}</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Cards -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.data.cards')}</span>
+            <span class="showcase-hint">{t('components.sections.data.cardsHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <Card client:visible hover>
+                <div class="flex items-start gap-4">
+                  <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0">
+                    <Icon name="zap" size="md" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <CardTitle>{t('components.sections.data.performance')}</CardTitle>
+                    <p class="text-xs text-foreground-subtle mt-0.5 font-medium">{t('components.sections.data.performanceScore')}</p>
+                  </div>
+                </div>
+                <CardContent>
+                  <p class="text-sm text-foreground-muted leading-relaxed">{t('components.sections.data.performanceDesc')}</p>
+                </CardContent>
+              </Card>
+
+              <Card client:visible hover>
+                <div class="flex items-start gap-4">
+                  <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0">
+                    <Icon name="shield" size="md" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <CardTitle>{t('components.sections.data.typeSafe')}</CardTitle>
+                    <p class="text-xs text-foreground-subtle mt-0.5 font-medium">{t('components.sections.data.typeSafeScore')}</p>
+                  </div>
+                </div>
+                <CardContent>
+                  <p class="text-sm text-foreground-muted leading-relaxed">{t('components.sections.data.typeSafeDesc')}</p>
+                </CardContent>
+              </Card>
+
+              <Card client:visible hover>
+                <div class="flex items-start gap-4">
+                  <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0">
+                    <Icon name="globe" size="md" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <CardTitle>{t('components.sections.data.i18nReady')}</CardTitle>
+                    <p class="text-xs text-foreground-subtle mt-0.5 font-medium">{t('components.sections.data.i18nScore')}</p>
+                  </div>
+                </div>
+                <CardContent>
+                  <p class="text-sm text-foreground-muted leading-relaxed">{t('components.sections.data.i18nDesc')}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avatars -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.data.avatars')}</span>
+            <span class="showcase-hint">{t('components.sections.data.avatarsHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="flex flex-wrap items-end gap-4">
+              <div class="text-center">
+                <Avatar size="xs" alt="John Doe" />
+                <span class="text-xs text-foreground-muted mt-2 block">xs</span>
+              </div>
+              <div class="text-center">
+                <Avatar size="sm" alt="Jane Smith" />
+                <span class="text-xs text-foreground-muted mt-2 block">sm</span>
+              </div>
+              <div class="text-center">
+                <Avatar size="md" alt="Alex Johnson" />
+                <span class="text-xs text-foreground-muted mt-2 block">md</span>
+              </div>
+              <div class="text-center">
+                <Avatar size="lg" alt="Sam Wilson" />
+                <span class="text-xs text-foreground-muted mt-2 block">lg</span>
+              </div>
+              <div class="text-center">
+                <Avatar size="xl" alt="Chris Lee" />
+                <span class="text-xs text-foreground-muted mt-2 block">xl</span>
+              </div>
+              <div class="pl-4 border-l border-border">
+                <div class="flex -space-x-3">
+                  <Avatar size="md" src="https://i.pravatar.cc/150?img=12" alt="User 1" class="ring-2 ring-background" />
+                  <Avatar size="md" src="https://i.pravatar.cc/150?img=33" alt="User 2" class="ring-2 ring-background" />
+                  <Avatar size="md" src="https://i.pravatar.cc/150?img=47" alt="User 3" class="ring-2 ring-background" />
+                  <div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-xs font-medium ring-2 ring-background">+5</div>
+                </div>
+                <span class="text-xs text-foreground-muted mt-2 block">{t('components.sections.data.stacked')}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Icons -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.data.icons')}</span>
+            <span class="showcase-hint">{t('components.sections.data.iconsHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
+              {['menu', 'x', 'chevron-down', 'arrow-right', 'search', 'plus', 'check', 'mail', 'phone', 'github', 'twitter', 'linkedin', 'sun', 'moon', 'zap', 'globe', 'shield', 'code', 'heart', 'star', 'alert-circle', 'check-circle', 'info', 'loader'].map((icon) => (
+                <Tooltip content={icon} position="top">
+                  <div class="flex items-center justify-center w-10 h-10 rounded-lg border border-border bg-background hover:bg-secondary hover:border-border-strong transition-all cursor-pointer group">
+                    <Icon name={icon as any} size="md" class="text-foreground-muted group-hover:text-foreground transition-colors" />
+                  </div>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading Section -->
+    <section id="loading" class="scroll-mt-32">
+      <div class="flex items-start gap-5 mb-10">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-brand-500/10 text-brand-500 shrink-0">
+          <Icon name="loader" size="lg" />
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-bold text-foreground">{t('components.sections.loading.title')}</h2>
+          <p class="text-foreground-muted mt-1">{t('components.sections.loading.description')}</p>
+        </div>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <!-- Skeleton Variants -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.loading.skeletonTypes')}</span>
+            <span class="showcase-hint">{t('components.sections.loading.skeletonTypesHint')}</span>
+          </div>
+          <div class="showcase-content space-y-6">
+            <div class="flex items-center gap-4">
+              <Skeleton variant="circular" width="48px" height="48px" />
+              <div class="flex-1 space-y-2">
+                <Skeleton variant="text" width="140px" />
+                <Skeleton variant="text" width="100px" />
+              </div>
+            </div>
+            <Skeleton variant="default" height="120px" />
+          </div>
+        </div>
+
+        <!-- Card Loading -->
+        <div class="component-showcase">
+          <div class="showcase-header">
+            <span class="showcase-label">{t('components.sections.loading.cardSkeleton')}</span>
+            <span class="showcase-hint">{t('components.sections.loading.cardSkeletonHint')}</span>
+          </div>
+          <div class="showcase-content">
+            <div class="p-5 rounded-lg border border-border bg-background">
+              <div class="flex items-center gap-4 mb-5">
+                <Skeleton variant="circular" width="40px" height="40px" />
+                <div class="flex-1 space-y-2">
+                  <Skeleton variant="text" width="50%" />
+                  <Skeleton variant="text" width="30%" />
+                </div>
+              </div>
+              <Skeleton variant="default" height="80px" class="mb-4" />
+              <div class="flex gap-3">
+                <Skeleton variant="default" width="80px" height="36px" />
+                <Skeleton variant="default" width="80px" height="36px" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- CTA Section -->
+  <section class="py-24 bg-surface-invert">
+    <div class="mx-auto max-w-6xl px-6">
+      <div class="max-w-2xl mx-auto text-center">
+        <h2 class="font-display text-3xl md:text-4xl font-bold text-on-invert mb-4">
+          {t('components.cta.title')}
+        </h2>
+        <p class="text-on-invert-secondary mb-8">
+          {t('components.cta.description')}
+        </p>
+        <div class="flex items-center justify-center gap-4">
+          <Button href="https://github.com/southwellmedia-dev/velocity" target="_blank">
+            <Icon name="github" size="sm" />
+            {t('components.cta.cloneRepo')}
+          </Button>
+          <Button variant="outline" href="/blog" class="border-border-invert text-on-invert hover:bg-surface-invert-secondary">
+            {t('components.cta.readDocs')}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</LandingLayout>
+
+<style>
+  /* Showcase card styling */
+  .component-showcase {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    overflow: visible;
+  }
+
+  .showcase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background-color: color-mix(in oklch, var(--background-secondary) 50%, transparent);
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+
+  .showcase-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--foreground-muted);
+  }
+
+  .showcase-hint {
+    font-size: 0.75rem;
+    color: var(--foreground-subtle);
+  }
+
+  .showcase-content {
+    padding: 1.25rem;
+    border-radius: 0 0 0.75rem 0.75rem;
+    background-color: var(--card);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Keyboard styling */
+  kbd {
+    font-family: var(--font-mono);
+  }
+</style>

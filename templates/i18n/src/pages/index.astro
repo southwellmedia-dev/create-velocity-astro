@@ -1,0 +1,29 @@
+---
+/**
+ * Root index page - renders the default locale (English) landing page
+ * This ensures the root URL "/" works and displays English content
+ */
+import LandingLayout from '@/layouts/LandingLayout.astro';
+import Hero from '@/components/landing/Hero.astro';
+import TechStack from '@/components/landing/TechStack.astro';
+import FeatureTabs from '@/components/landing/FeatureTabs.tsx';
+import Credibility from '@/components/landing/Credibility.astro';
+import CTA from '@/components/landing/CTA.astro';
+import { defaultLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/index';
+
+const locale = defaultLocale;
+const t = useTranslations(locale);
+---
+
+<LandingLayout
+  title={t('home.title')}
+  description={t('home.subtitle')}
+  lang={locale}
+>
+  <Hero locale={locale} />
+  <TechStack locale={locale} />
+  <FeatureTabs locale={locale} client:visible />
+  <Credibility locale={locale} />
+  <CTA locale={locale} />
+</LandingLayout>

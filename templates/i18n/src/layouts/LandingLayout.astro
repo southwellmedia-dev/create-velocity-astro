@@ -1,0 +1,51 @@
+---
+/**
+ * LandingLayout (i18n-aware)
+ * Layout wrapper for landing-style pages (marketing, demo, showcase)
+ * Uses Navbar + LandingFooter for consistent landing page navigation
+ * Passes locale to all child components for proper translations
+ */
+import BaseLayout from './BaseLayout.astro';
+import Navbar from '@/components/landing/Navbar.astro';
+import LandingFooter from '@/components/landing/LandingFooter.astro';
+import { type Locale, defaultLocale } from '@/i18n/config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  noindex?: boolean;
+  nofollow?: boolean;
+  includeOrgSchema?: boolean;
+  lang?: Locale;
+}
+
+const {
+  title,
+  description,
+  image,
+  imageAlt,
+  noindex = false,
+  nofollow = false,
+  includeOrgSchema = false,
+  lang = defaultLocale,
+} = Astro.props;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={image}
+  imageAlt={imageAlt}
+  noindex={noindex}
+  nofollow={nofollow}
+  includeOrgSchema={includeOrgSchema}
+  lang={lang}
+>
+  <Navbar slot="header" />
+
+  <slot />
+
+  <LandingFooter slot="footer" locale={lang} />
+</BaseLayout>

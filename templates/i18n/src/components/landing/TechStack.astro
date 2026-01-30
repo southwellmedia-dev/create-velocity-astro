@@ -1,0 +1,53 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import { type Locale, defaultLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/index';
+
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = defaultLocale } = Astro.props;
+const t = useTranslations(locale);
+
+const stack = [
+  {
+    nameKey: 'techStack.astro.name' as const,
+    descKey: 'techStack.astro.desc' as const,
+    icon: 'zap' as const,
+  },
+  {
+    nameKey: 'techStack.tailwind.name' as const,
+    descKey: 'techStack.tailwind.desc' as const,
+    icon: 'layout' as const,
+  },
+  {
+    nameKey: 'techStack.typescript.name' as const,
+    descKey: 'techStack.typescript.desc' as const,
+    icon: 'shield' as const,
+  },
+  {
+    nameKey: 'techStack.motion.name' as const,
+    descKey: 'techStack.motion.desc' as const,
+    icon: 'box' as const,
+  },
+];
+---
+
+<section class="border-y border-border bg-background-secondary py-12">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+      {stack.map((item) => (
+        <div class="flex flex-col items-center gap-2 text-center md:items-start md:text-left">
+          <div class="flex items-center gap-2 text-foreground font-display font-bold text-lg">
+            <span class="text-brand-500">
+              <Icon name={item.icon} size="md" />
+            </span>
+            {t(item.nameKey)}
+          </div>
+          <p class="text-sm text-foreground-muted font-medium">{t(item.descKey)}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
