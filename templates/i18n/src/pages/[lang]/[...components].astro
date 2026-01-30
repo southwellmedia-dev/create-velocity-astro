@@ -1,7 +1,12 @@
 ---
 /**
- * Components page - Localized version
- * Showcases Velocity's UI component library with full i18n support
+ * Components page - Localized versions with translated URLs
+ *
+ * This page generates localized URLs for the components page:
+ * - /es/componentes (Spanish)
+ * - /fr/composants (French)
+ *
+ * The English version is at /components (see src/pages/components.astro)
  */
 import LandingLayout from '@/layouts/LandingLayout.astro';
 import Icon from '@/components/ui/Icon.astro';
@@ -20,13 +25,20 @@ import { Select } from '@/components/ui/Select';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Radio } from '@/components/ui/Radio';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
-import { locales, isValidLocale, type Locale } from '@/i18n/config';
+import { locales, isValidLocale, defaultLocale, type Locale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/index';
+import { routes } from '@/i18n/routes';
 
 export function getStaticPaths() {
-  return locales.map((lang) => ({
-    params: { lang },
-  }));
+  // Generate paths for non-default locales with their translated slugs
+  return locales
+    .filter((lang) => lang !== defaultLocale)
+    .map((lang) => ({
+      params: {
+        lang,
+        components: routes.components[lang], // e.g., 'componentes' for Spanish
+      },
+    }));
 }
 
 const { lang } = Astro.params;
@@ -53,6 +65,7 @@ const categories = [
   title={t('components.meta.title')}
   description={t('components.meta.description')}
   lang={locale}
+  routeId="components"
 >
 
   <!-- Hero Section -->

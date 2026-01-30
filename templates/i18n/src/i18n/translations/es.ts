@@ -174,6 +174,83 @@ export const es: TranslationKeys = {
     cta: 'Comenzar',
   },
 
+  // About page
+  about: {
+    meta: {
+      title: 'Sobre Nosotros',
+      description: 'Conoce Velocity y el equipo detrás del proyecto.',
+    },
+    hero: {
+      badge: 'Nuestra Historia',
+      title: 'Creado por desarrolladores,',
+      titleHighlight: 'para desarrolladores.',
+      description: 'Velocity nació de la frustración de configurar las mismas herramientas una y otra vez. Decidimos crear el starter que siempre quisimos que existiera.',
+    },
+    mission: {
+      title: 'Nuestra Misión',
+      description: 'Ayudar a los desarrolladores a crear sitios web hermosos y de alto rendimiento más rápido, eliminando el código repetitivo y proporcionando valores predeterminados sensatos.',
+    },
+    values: {
+      title: 'Lo Que Creemos',
+      performance: {
+        title: 'Rendimiento Primero',
+        description: 'Cada decisión se toma pensando en el rendimiento. Cero JavaScript por defecto, imágenes optimizadas y CSS mínimo.',
+      },
+      simplicity: {
+        title: 'La Simplicidad Importa',
+        description: 'Eliminamos la complejidad para que puedas enfocarte en lo que importa: crear excelentes productos para tus usuarios.',
+      },
+      openSource: {
+        title: 'Código Abierto',
+        description: 'Velocity es gratuito y de código abierto. Creemos en devolver a la comunidad que hizo esto posible.',
+      },
+    },
+  },
+
+  // Contact page
+  contact: {
+    meta: {
+      title: 'Contáctanos',
+      description: 'Ponte en contacto con el equipo de Velocity.',
+    },
+    hero: {
+      badge: 'Ponte en Contacto',
+      title: 'Vamos a',
+      titleHighlight: 'conectar.',
+      description: '¿Tienes una pregunta, sugerencia o simplemente quieres saludar? Nos encantaría saber de ti.',
+    },
+    form: {
+      title: 'Envíanos un mensaje',
+      name: 'Tu Nombre',
+      namePlaceholder: 'Juan Pérez',
+      email: 'Correo Electrónico',
+      emailPlaceholder: 'juan@ejemplo.com',
+      subject: 'Asunto',
+      subjectPlaceholder: '¿Cómo podemos ayudarte?',
+      message: 'Mensaje',
+      messagePlaceholder: 'Cuéntanos más sobre tu proyecto o pregunta...',
+      submit: 'Enviar Mensaje',
+      sending: 'Enviando...',
+      success: '¡Mensaje enviado con éxito! Te responderemos pronto.',
+      error: 'Error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.',
+    },
+    info: {
+      title: 'Otras formas de contactarnos',
+      email: {
+        label: 'Correo',
+        value: 'hola@velocity.dev',
+      },
+      github: {
+        label: 'GitHub',
+        value: 'github.com/velocity',
+      },
+      twitter: {
+        label: 'Twitter',
+        value: '@velocity_dev',
+      },
+    },
+  },
+
   // Forms
   form: {
     name: 'Nombre',

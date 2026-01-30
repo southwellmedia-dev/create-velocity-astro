@@ -9,6 +9,7 @@ import BaseLayout from './BaseLayout.astro';
 import Navbar from '@/components/landing/Navbar.astro';
 import LandingFooter from '@/components/landing/LandingFooter.astro';
 import { type Locale, defaultLocale } from '@/i18n/config';
+import type { RouteId } from '@/i18n/routes';
 
 interface Props {
   title?: string;
@@ -19,6 +20,10 @@ interface Props {
   nofollow?: boolean;
   includeOrgSchema?: boolean;
   lang?: Locale;
+  /**
+   * Route ID for generating proper hreflang tags with translated URLs.
+   */
+  routeId?: RouteId;
 }
 
 const {
@@ -30,6 +35,7 @@ const {
   nofollow = false,
   includeOrgSchema = false,
   lang = defaultLocale,
+  routeId,
 } = Astro.props;
 ---
 
@@ -42,6 +48,7 @@ const {
   nofollow={nofollow}
   includeOrgSchema={includeOrgSchema}
   lang={lang}
+  routeId={routeId}
 >
   <Navbar slot="header" />
 

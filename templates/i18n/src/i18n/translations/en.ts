@@ -172,6 +172,83 @@ export const en = {
     cta: 'Get Started',
   },
 
+  // About page
+  about: {
+    meta: {
+      title: 'About Us',
+      description: 'Learn about Velocity and the team behind it.',
+    },
+    hero: {
+      badge: 'Our Story',
+      title: 'Built by developers,',
+      titleHighlight: 'for developers.',
+      description: 'Velocity was born from the frustration of setting up the same tooling over and over. We decided to create the starter we always wished existed.',
+    },
+    mission: {
+      title: 'Our Mission',
+      description: 'To help developers ship beautiful, performant websites faster by eliminating boilerplate and providing sensible defaults.',
+    },
+    values: {
+      title: 'What We Believe',
+      performance: {
+        title: 'Performance First',
+        description: 'Every decision is made with performance in mind. Zero JavaScript by default, optimized images, and minimal CSS.',
+      },
+      simplicity: {
+        title: 'Simplicity Matters',
+        description: 'We strip away complexity so you can focus on what matters: building great products for your users.',
+      },
+      openSource: {
+        title: 'Open Source',
+        description: 'Velocity is free and open source. We believe in giving back to the community that made this possible.',
+      },
+    },
+  },
+
+  // Contact page
+  contact: {
+    meta: {
+      title: 'Contact Us',
+      description: 'Get in touch with the Velocity team.',
+    },
+    hero: {
+      badge: 'Get in Touch',
+      title: "Let's",
+      titleHighlight: 'connect.',
+      description: 'Have a question, suggestion, or just want to say hello? We would love to hear from you.',
+    },
+    form: {
+      title: 'Send us a message',
+      name: 'Your Name',
+      namePlaceholder: 'John Doe',
+      email: 'Email Address',
+      emailPlaceholder: 'john@example.com',
+      subject: 'Subject',
+      subjectPlaceholder: 'How can we help?',
+      message: 'Message',
+      messagePlaceholder: 'Tell us more about your project or question...',
+      submit: 'Send Message',
+      sending: 'Sending...',
+      success: 'Message sent successfully! We will get back to you soon.',
+      error: 'Failed to send message. Please try again later.',
+    },
+    info: {
+      title: 'Other ways to reach us',
+      email: {
+        label: 'Email',
+        value: 'hello@velocity.dev',
+      },
+      github: {
+        label: 'GitHub',
+        value: 'github.com/velocity',
+      },
+      twitter: {
+        label: 'Twitter',
+        value: '@velocity_dev',
+      },
+    },
+  },
+
   // Forms
   form: {
     name: 'Name',

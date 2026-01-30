@@ -2,10 +2,12 @@
 import '@/styles/global.css';
 import SEO from '@/components/seo/SEO.astro';
 import JsonLd from '@/components/seo/JsonLd.astro';
+import Hreflang from '@/components/i18n/Hreflang.astro';
 import { createWebsiteSchema, createOrganizationSchema } from '@/lib/schema';
 import type { WebSite, Organization, WithContext } from 'schema-dts';
 import siteConfig from '@/config/site.config';
 import { type Locale, defaultLocale, getLocaleFromPath } from '@/i18n/config';
+import type { RouteId } from '@/i18n/routes';
 
 interface Props {
   title?: string;
@@ -22,6 +24,11 @@ interface Props {
   nofollow?: boolean;
   includeOrgSchema?: boolean;
   lang?: Locale;
+  /**
+   * Route ID for generating proper hreflang tags.
+   * If provided, uses translated URLs; otherwise falls back to path-based hreflang.
+   */
+  routeId?: RouteId;
 }
 
 const {
@@ -34,6 +41,7 @@ const {
   nofollow = false,
   includeOrgSchema = false,
   lang,
+  routeId,
 } = Astro.props;
 
 // Get locale from props or URL path
@@ -77,11 +85,8 @@ if (includeOrgSchema) {
     <!-- Canonical URL -->
     <link rel="canonical" href={new URL(Astro.url.pathname, siteConfig.url).toString()} />
 
-    <!-- Alternate language links for SEO -->
-    <link rel="alternate" hreflang="en" href={new URL(Astro.url.pathname.replace(/^\/(es|fr)/, ''), siteConfig.url).toString()} />
-    <link rel="alternate" hreflang="es" href={new URL(`/es${Astro.url.pathname.replace(/^\/(en|es|fr)/, '')}`, siteConfig.url).toString()} />
-    <link rel="alternate" hreflang="fr" href={new URL(`/fr${Astro.url.pathname.replace(/^\/(en|es|fr)/, '')}`, siteConfig.url).toString()} />
-    <link rel="alternate" hreflang="x-default" href={new URL(Astro.url.pathname.replace(/^\/(es|fr)/, ''), siteConfig.url).toString()} />
+    <!-- Alternate language links for SEO (uses translated URLs when routeId provided) -->
+    <Hreflang routeId={routeId} />
 
     <!-- JSON-LD Structured Data -->
     <JsonLd schema={schemas} />

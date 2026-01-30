@@ -174,6 +174,83 @@ export const fr: TranslationKeys = {
     cta: 'Commencer',
   },
 
+  // About page
+  about: {
+    meta: {
+      title: 'À Propos',
+      description: 'Découvrez Velocity et l\'équipe derrière le projet.',
+    },
+    hero: {
+      badge: 'Notre Histoire',
+      title: 'Créé par des développeurs,',
+      titleHighlight: 'pour des développeurs.',
+      description: 'Velocity est né de la frustration de configurer les mêmes outils encore et encore. Nous avons décidé de créer le starter que nous avions toujours voulu.',
+    },
+    mission: {
+      title: 'Notre Mission',
+      description: 'Aider les développeurs à créer des sites web beaux et performants plus rapidement en éliminant le code répétitif et en fournissant des valeurs par défaut sensées.',
+    },
+    values: {
+      title: 'Ce Que Nous Croyons',
+      performance: {
+        title: 'Performance Avant Tout',
+        description: 'Chaque décision est prise en pensant à la performance. Zéro JavaScript par défaut, images optimisées et CSS minimal.',
+      },
+      simplicity: {
+        title: 'La Simplicité Compte',
+        description: 'Nous éliminons la complexité pour que vous puissiez vous concentrer sur ce qui compte : créer d\'excellents produits pour vos utilisateurs.',
+      },
+      openSource: {
+        title: 'Open Source',
+        description: 'Velocity est gratuit et open source. Nous croyons qu\'il faut rendre à la communauté ce qui a rendu cela possible.',
+      },
+    },
+  },
+
+  // Contact page
+  contact: {
+    meta: {
+      title: 'Contactez-nous',
+      description: 'Prenez contact avec l\'équipe Velocity.',
+    },
+    hero: {
+      badge: 'Prenez Contact',
+      title: 'Restons en',
+      titleHighlight: 'contact.',
+      description: 'Une question, une suggestion ou juste envie de dire bonjour ? Nous serions ravis de vous entendre.',
+    },
+    form: {
+      title: 'Envoyez-nous un message',
+      name: 'Votre Nom',
+      namePlaceholder: 'Jean Dupont',
+      email: 'Adresse E-mail',
+      emailPlaceholder: 'jean@exemple.fr',
+      subject: 'Sujet',
+      subjectPlaceholder: 'Comment pouvons-nous vous aider ?',
+      message: 'Message',
+      messagePlaceholder: 'Dites-nous en plus sur votre projet ou question...',
+      submit: 'Envoyer le Message',
+      sending: 'Envoi en cours...',
+      success: 'Message envoyé avec succès ! Nous vous répondrons bientôt.',
+      error: 'Échec de l\'envoi du message. Veuillez réessayer plus tard.',
+    },
+    info: {
+      title: 'Autres moyens de nous contacter',
+      email: {
+        label: 'E-mail',
+        value: 'bonjour@velocity.dev',
+      },
+      github: {
+        label: 'GitHub',
+        value: 'github.com/velocity',
+      },
+      twitter: {
+        label: 'Twitter',
+        value: '@velocity_dev',
+      },
+    },
+  },
+
   // Forms
   form: {
     name: 'Nom',

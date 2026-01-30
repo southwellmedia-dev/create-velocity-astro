@@ -83,3 +83,14 @@ export function getTranslations(locale: Locale) {
 
 // Re-export config
 export { locales, defaultLocale, type Locale } from './config';
+
+// Re-export routes and helpers for translated URLs
+export { routes, type RouteId, routeIds, isValidRouteId } from './routes';
+export {
+  getLocalizedPath,
+  resolveRouteFromPath,
+  switchLocale,
+  getRouteTranslations,
+  getRouteSlug,
+  isRoute,
+} from './helpers';

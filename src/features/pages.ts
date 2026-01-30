@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { PageLayout } from '../types.js';
 
@@ -11,6 +11,46 @@ function toTitle(slug: string): string {
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+/**
+ * Converts a page slug to a route ID (snake_case)
+ * e.g., 'about-us' -> 'about_us'
+ */
+function toRouteId(slug: string): string {
+  return slug.replace(/-/g, '_');
+}
+
+/**
+ * Adds a new route entry to routes.ts
+ * Creates the route with the same English slug for all locales (user customizes later)
+ */
+function addRouteEntry(targetDir: string, pageName: string): void {
+  const routesPath = join(targetDir, 'src', 'i18n', 'routes.ts');
+
+  if (!existsSync(routesPath)) {
+    return; // routes.ts doesn't exist, skip
+  }
+
+  const routeId = toRouteId(pageName);
+  const content = readFileSync(routesPath, 'utf-8');
+
+  // Check if route already exists
+  if (content.includes(`${routeId}:`)) {
+    return; // Route already defined
+  }
+
+  // Find the closing of routes object (before "} as const satisfies")
+  const insertPoint = content.indexOf('} as const satisfies');
+  if (insertPoint === -1) {
+    return; // Can't find insertion point
+  }
+
+  // Create new route entry with same slug for all locales
+  const newRoute = `  // Custom page: ${pageName}\n  ${routeId}: { en: '${pageName}', es: '${pageName}', fr: '${pageName}' },\n`;
+
+  const newContent = content.slice(0, insertPoint) + newRoute + content.slice(insertPoint);
+  writeFileSync(routesPath, newContent);
 }
 
 /**
@@ -49,23 +89,30 @@ import ${layoutName} from '@/layouts/${layoutName}.astro';
 }
 
 /**
- * Generates the i18n-aware page template
+ * Generates the i18n-aware page template with translated URL support
  */
 function generateI18nPageTemplate(pageName: string, layout: PageLayout): string {
   const title = toTitle(pageName);
   const layoutName = layout === 'landing' ? 'LandingLayout' : 'PageLayout';
-  const titleKey = `${pageName.replace(/-/g, '_')}.title`;
-  const descKey = `${pageName.replace(/-/g, '_')}.description`;
+  const routeId = toRouteId(pageName);
+  const titleKey = `${routeId}.title`;
+  const descKey = `${routeId}.description`;
 
   return `---
 import ${layoutName} from '@/layouts/${layoutName}.astro';
-import { locales, isValidLocale, type Locale } from '@/i18n/config';
+import { locales, isValidLocale, defaultLocale, type Locale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/index';
+import { routes } from '@/i18n/routes';
 
 export function getStaticPaths() {
-  return locales.map((lang) => ({
-    params: { lang },
-  }));
+  return locales
+    .filter((lang) => lang !== defaultLocale)
+    .map((lang) => ({
+      params: {
+        lang,
+        ${routeId}: routes.${routeId}[lang],
+      },
+    }));
 }
 
 const { lang } = Astro.params;
@@ -82,6 +129,7 @@ const t = useTranslations(locale);
   title={t('${titleKey}') || '${title}'}
   description={t('${descKey}') || 'Add your description here'}
   lang={locale}
+  routeId="${routeId}"
 >
   <!-- Hero Section -->
   <section class="py-20 bg-secondary">
@@ -142,10 +190,15 @@ export async function generatePages(
     }
 
     for (const pageName of pages) {
-      const filePath = join(langDir, `${pageName}.astro`);
+      const routeId = toRouteId(pageName);
+      // Use rest parameter syntax for translated URL slugs
+      const filePath = join(langDir, `[...${routeId}].astro`);
       const template = generateI18nPageTemplate(pageName, layout);
       writeFileSync(filePath, template);
-      generatedFiles.push(`src/pages/[lang]/${pageName}.astro`);
+      generatedFiles.push(`src/pages/[lang]/[...${routeId}].astro`);
+
+      // Add route entry to routes.ts
+      addRouteEntry(targetDir, pageName);
     }
   }
 
@@ -157,5 +210,5 @@ export async function generatePages(
  */
 export const PAGES_FILES = [
   'src/pages/{pageName}.astro',
-  'src/pages/[lang]/{pageName}.astro',
+  'src/pages/[lang]/[...{routeId}].astro',
 ];

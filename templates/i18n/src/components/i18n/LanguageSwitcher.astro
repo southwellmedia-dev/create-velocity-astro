@@ -1,10 +1,18 @@
 ---
 /**
  * Language Switcher Component
- * Allows users to switch between available locales
+ * Allows users to switch between available locales while maintaining the current page
+ *
+ * This component uses the route-aware switchLocale() helper to generate
+ * correct translated URLs when switching languages.
+ *
+ * Example:
+ * - On /about → switching to ES → /es/sobre-nosotros
+ * - On /es/sobre-nosotros → switching to FR → /fr/a-propos
  */
 
-import { locales, localeNames, localeFlags, type Locale, localePath, getLocaleFromPath } from '@/i18n/config';
+import { locales, localeNames, localeFlags, type Locale, getLocaleFromPath } from '@/i18n/config';
+import { switchLocale } from '@/i18n/helpers';
 
 interface Props {
   class?: string;
@@ -51,7 +59,7 @@ const currentLocale = getLocaleFromPath(currentPath);
       {
         locales.map((locale) => {
           const isActive = locale === currentLocale;
-          const href = localePath(currentPath, locale);
+          const href = switchLocale(currentPath, locale);
 
           return (
             <a
