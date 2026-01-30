@@ -85,7 +85,7 @@ export function getTranslations(locale: Locale) {
 export { locales, defaultLocale, type Locale } from './config';
 
 // Re-export routes and helpers for translated URLs
-export { routes, type RouteId, routeIds, isValidRouteId } from './routes';
+export { routes, type RouteId, routeIds, isValidRouteId, type NavConfig } from './routes';
 export {
   getLocalizedPath,
   resolveRouteFromPath,
@@ -93,4 +93,7 @@ export {
   getRouteTranslations,
   getRouteSlug,
   isRoute,
+  getNavRoutes,
+  type NavRoute,
+  type ResolvedRoute,
 } from './helpers';

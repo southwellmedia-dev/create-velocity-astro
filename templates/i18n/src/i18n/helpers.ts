@@ -59,20 +59,30 @@ function buildPathLookup(): Map<string, { routeId: RouteId; locale: Locale }> {
 const pathLookup = buildPathLookup();
 
 /**
+ * Result from resolving a route from a path
+ */
+export type ResolvedRoute = {
+  routeId: RouteId;
+  locale: Locale;
+  /** Extra path segments after the route (e.g., blog post slug) */
+  extra?: string;
+};
+
+/**
  * Resolve route information from a URL path
  *
  * @param pathname - The URL pathname (e.g., '/es/sobre-nosotros')
- * @returns The route ID and locale, or null if not a known route
+ * @returns The route ID, locale, and any extra path segments, or null if not a known route
  *
  * @example
  * resolveRouteFromPath('/about')           // → { routeId: 'about', locale: 'en' }
  * resolveRouteFromPath('/es/sobre-nosotros') // → { routeId: 'about', locale: 'es' }
  * resolveRouteFromPath('/fr/a-propos')     // → { routeId: 'about', locale: 'fr' }
+ * resolveRouteFromPath('/blog/my-post')    // → { routeId: 'blog', locale: 'en', extra: 'my-post' }
+ * resolveRouteFromPath('/es/blog/my-post') // → { routeId: 'blog', locale: 'es', extra: 'my-post' }
  * resolveRouteFromPath('/unknown')         // → null
  */
-export function resolveRouteFromPath(
-  pathname: string
-): { routeId: RouteId; locale: Locale } | null {
+export function resolveRouteFromPath(pathname: string): ResolvedRoute | null {
   // Clean the path
   const cleanPath = pathname.replace(/^\/+|\/+$/g, '');
   const segments = cleanPath.split('/').filter(Boolean);
@@ -106,6 +116,37 @@ export function resolveRouteFromPath(
     return { routeId: 'home', locale: segments[0] as Locale };
   }
 
+  // Handle nested routes like blog posts: /blog/my-post or /es/blog/my-post
+  // Check if the first slug segment matches a known route
+  if (slugSegments.length > 1) {
+    const firstSlug = slugSegments[0];
+    const firstSlugLookupKey = `${locale}/${firstSlug}`;
+    const parentMatch = pathLookup.get(firstSlugLookupKey);
+
+    if (parentMatch) {
+      // Found a parent route, the rest is extra path info
+      const extra = slugSegments.slice(1).join('/');
+      return {
+        routeId: parentMatch.routeId,
+        locale,
+        extra,
+      };
+    }
+
+    // Also check for translated blog slugs (e.g., /fr/blogue/my-post)
+    // We need to find which route this slug belongs to
+    for (const [routeId, routeSlugs] of Object.entries(routes)) {
+      if (routeSlugs[locale] === firstSlug) {
+        const extra = slugSegments.slice(1).join('/');
+        return {
+          routeId: routeId as RouteId,
+          locale,
+          extra,
+        };
+      }
+    }
+  }
+
   return null;
 }
 
@@ -117,16 +158,27 @@ export function resolveRouteFromPath(
  * @returns The new path in the target locale, or the home page if route unknown
  *
  * @example
- * switchLocale('/about', 'es')           // → '/es/sobre-nosotros'
- * switchLocale('/es/sobre-nosotros', 'fr') // → '/fr/a-propos'
- * switchLocale('/es/sobre-nosotros', 'en') // → '/about'
- * switchLocale('/unknown', 'es')         // → '/es' (fallback to home)
+ * switchLocale('/about', 'es')               // → '/es/sobre-nosotros'
+ * switchLocale('/es/sobre-nosotros', 'fr')   // → '/fr/a-propos'
+ * switchLocale('/es/sobre-nosotros', 'en')   // → '/about'
+ * switchLocale('/blog/my-post', 'es')        // → '/es/blog/my-post'
+ * switchLocale('/es/blog/my-post', 'fr')     // → '/fr/blogue/my-post'
+ * switchLocale('/unknown', 'es')             // → '/es' (fallback to home)
  */
 export function switchLocale(currentPath: string, targetLocale: Locale): string {
   const resolved = resolveRouteFromPath(currentPath);
 
   if (resolved) {
-    return getLocalizedPath(resolved.routeId, targetLocale);
+    const basePath = getLocalizedPath(resolved.routeId, targetLocale);
+
+    // If there's extra path info (like blog post slug), append it
+    if (resolved.extra) {
+      // Ensure we don't double-slash
+      const separator = basePath.endsWith('/') ? '' : '/';
+      return `${basePath}${separator}${resolved.extra}`;
+    }
+
+    return basePath;
   }
 
   // Fallback: if we can't resolve the route, go to home page for target locale
@@ -180,6 +232,40 @@ export function getRouteSlug(routeId: RouteId, locale: Locale): string {
 export function isRoute(pathname: string, routeId: RouteId): boolean {
   const resolved = resolveRouteFromPath(pathname);
   return resolved?.routeId === routeId;
+}
+
+/**
+ * Navigation route information
+ */
+export type NavRoute = {
+  routeId: RouteId;
+  label: string;
+  order: number;
+};
+
+/**
+ * Get routes that should appear in navigation, sorted by order
+ *
+ * @returns Array of navigation routes with their translation keys
+ *
+ * @example
+ * const navRoutes = getNavRoutes();
+ * // → [
+ * //   { routeId: 'components', label: 'nav.components', order: 1 },
+ * //   { routeId: 'blog', label: 'nav.blog', order: 2 },
+ * //   { routeId: 'about', label: 'nav.about', order: 3 },
+ * //   { routeId: 'contact', label: 'nav.contact', order: 4 },
+ * // ]
+ */
+export function getNavRoutes(): NavRoute[] {
+  return Object.entries(routes)
+    .filter(([_, route]) => route.nav?.show === true)
+    .map(([routeId, route]) => ({
+      routeId: routeId as RouteId,
+      label: route.nav!.label,
+      order: route.nav!.order,
+    }))
+    .sort((a, b) => a.order - b.order);
 }
 
 // Re-export route types for convenience

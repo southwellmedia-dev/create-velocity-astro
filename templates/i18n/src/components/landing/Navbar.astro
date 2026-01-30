@@ -1,23 +1,31 @@
 ---
+/**
+ * Navbar Component (i18n-aware)
+ * Dynamic navigation that reads routes from routes.ts
+ * Includes LanguageSwitcher for locale switching
+ */
 import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
 import ThemeToggle from '@/components/layout/ThemeToggle.astro';
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher.astro';
-import { getLocaleFromPath, defaultLocale, localePath } from '@/i18n/config';
+import { getLocaleFromPath, defaultLocale } from '@/i18n/config';
+import { useTranslations, getLocalizedPath, getNavRoutes } from '@/i18n/index';
 
 // Get current locale from URL
 const currentPath = Astro.url.pathname;
 const currentLocale = getLocaleFromPath(currentPath);
+const t = useTranslations(currentLocale);
+
+// Get navigation routes dynamically from routes.ts
+const navRoutes = getNavRoutes();
 
 // Check if we're on the landing page to determine link behavior
 const isLandingPage = currentPath === '/' || currentPath === `/${currentLocale}` || currentPath === `/${currentLocale}/`;
 
 // Build locale-aware links
-const homeLink = currentLocale === defaultLocale ? '/' : `/${currentLocale}`;
+const homeLink = getLocalizedPath('home', currentLocale);
 const featuresLink = isLandingPage ? '#features' : `${homeLink}#features`;
 const ctaLink = isLandingPage ? '#cta' : `${homeLink}#cta`;
-const componentsLink = localePath('/components', currentLocale);
-const blogLink = localePath('/blog', currentLocale);
 ---
 
 <nav class="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -30,10 +38,24 @@ const blogLink = localePath('/blog', currentLocale);
 
     <!-- Desktop Menu -->
     <div class="hidden items-center gap-8 md:flex">
-      <a href={featuresLink} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">Features</a>
-      <a href={componentsLink} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">Components</a>
-      <a href={blogLink} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">Blog</a>
-      <a href={blogLink} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">Docs</a>
+      <!-- Features link (anchor to landing page section) -->
+      <a
+        href={featuresLink}
+        class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
+      >
+        {t('nav.features')}
+      </a>
+
+      <!-- Dynamic navigation from routes.ts -->
+      {navRoutes.map(({ routeId, label }) => (
+        <a
+          href={getLocalizedPath(routeId, currentLocale)}
+          class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
+        >
+          {t(label as any)}
+        </a>
+      ))}
+
       <div class="flex items-center gap-2">
         <LanguageSwitcher />
         <ThemeToggle />
@@ -47,7 +69,7 @@ const blogLink = localePath('/blog', currentLocale);
         >
           <Icon name="github" size="sm" />
         </Button>
-        <Button size="sm" href={ctaLink}>Get Started</Button>
+        <Button size="sm" href={ctaLink}>{t('nav.getStarted')}</Button>
       </div>
     </div>
 
@@ -70,15 +92,29 @@ const blogLink = localePath('/blog', currentLocale);
 
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden absolute top-16 left-0 w-full bg-background border-b border-border p-6 md:hidden flex-col gap-4 shadow-lg">
-    <a href={featuresLink} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">Features</a>
-    <a href={componentsLink} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">Components</a>
-    <a href={blogLink} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">Blog</a>
-    <a href={blogLink} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">Docs</a>
+    <!-- Features link (anchor to landing page section) -->
+    <a
+      href={featuresLink}
+      class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors"
+    >
+      {t('nav.features')}
+    </a>
+
+    <!-- Dynamic navigation from routes.ts -->
+    {navRoutes.map(({ routeId, label }) => (
+      <a
+        href={getLocalizedPath(routeId, currentLocale)}
+        class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors"
+      >
+        {t(label as any)}
+      </a>
+    ))}
+
     <div class="flex items-center gap-3 pt-2 border-t border-border">
       <LanguageSwitcher />
       <ThemeToggle />
     </div>
-    <Button fullWidth href={ctaLink}>Get Started</Button>
+    <Button fullWidth href={ctaLink}>{t('nav.getStarted')}</Button>
   </div>
 </nav>
 

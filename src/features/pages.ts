@@ -22,10 +22,75 @@ function toRouteId(slug: string): string {
 }
 
 /**
- * Adds a new route entry to routes.ts
- * Creates the route with the same English slug for all locales (user customizes later)
+ * Calculates the next available nav order by finding the highest existing order
  */
-function addRouteEntry(targetDir: string, pageName: string): void {
+function getNextNavOrder(content: string): number {
+  // Match all order values in nav configs
+  const orderMatches = [...content.matchAll(/order:\s*(\d+)/g)];
+  let maxOrder = 0;
+
+  for (const match of orderMatches) {
+    const orderStr = match[1];
+    if (orderStr) {
+      const order = parseInt(orderStr, 10);
+      if (order > maxOrder) {
+        maxOrder = order;
+      }
+    }
+  }
+
+  // Return the next order (10 more than current max for room to insert)
+  return maxOrder + 10;
+}
+
+/**
+ * Adds a new route entry to base routes.ts (non-i18n projects)
+ * Includes nav config so the page appears in navigation
+ */
+function addBaseRouteEntry(targetDir: string, pageName: string): void {
+  const routesPath = join(targetDir, 'src', 'config', 'routes.ts');
+
+  if (!existsSync(routesPath)) {
+    return; // routes.ts doesn't exist, skip
+  }
+
+  const routeId = toRouteId(pageName);
+  const title = toTitle(pageName);
+  const content = readFileSync(routesPath, 'utf-8');
+
+  // Check if route already exists
+  if (content.includes(`${routeId}:`)) {
+    return; // Route already defined
+  }
+
+  // Find the closing of routes object (before "} as const satisfies")
+  const insertPoint = content.indexOf('} as const satisfies');
+  if (insertPoint === -1) {
+    return; // Can't find insertion point
+  }
+
+  // Calculate the next nav order
+  const navOrder = getNextNavOrder(content);
+
+  // Create new route entry with nav config
+  const newRoute = `
+  // Custom page: ${pageName}
+  ${routeId}: {
+    path: '/${pageName}',
+    nav: { show: true, order: ${navOrder}, label: '${title}' },
+  },
+`;
+
+  const newContent = content.slice(0, insertPoint) + newRoute + content.slice(insertPoint);
+  writeFileSync(routesPath, newContent);
+}
+
+/**
+ * Adds a new route entry to i18n routes.ts
+ * Creates the route with the same English slug for all locales (user customizes later)
+ * Includes nav config so the page appears in navigation
+ */
+function addI18nRouteEntry(targetDir: string, pageName: string): void {
   const routesPath = join(targetDir, 'src', 'i18n', 'routes.ts');
 
   if (!existsSync(routesPath)) {
@@ -46,11 +111,77 @@ function addRouteEntry(targetDir: string, pageName: string): void {
     return; // Can't find insertion point
   }
 
-  // Create new route entry with same slug for all locales
-  const newRoute = `  // Custom page: ${pageName}\n  ${routeId}: { en: '${pageName}', es: '${pageName}', fr: '${pageName}' },\n`;
+  // Calculate the next nav order
+  const navOrder = getNextNavOrder(content);
+
+  // Create new route entry with nav config
+  // Uses the route ID as the translation key (user should add translation)
+  const title = toTitle(pageName);
+  const newRoute = `
+  // Custom page: ${pageName}
+  ${routeId}: {
+    en: '${pageName}', es: '${pageName}', fr: '${pageName}',
+    nav: { show: true, order: ${navOrder}, label: 'nav.${routeId}' },
+  },
+`;
 
   const newContent = content.slice(0, insertPoint) + newRoute + content.slice(insertPoint);
   writeFileSync(routesPath, newContent);
+
+  // Also add translation keys to translation files
+  addI18nTranslationKeys(targetDir, routeId, title);
+}
+
+/**
+ * Adds translation keys for a new route to all i18n translation files
+ */
+function addI18nTranslationKeys(targetDir: string, routeId: string, title: string): void {
+  const locales = ['en', 'es', 'fr'];
+
+  for (const locale of locales) {
+    const translationPath = join(targetDir, 'src', 'i18n', 'translations', `${locale}.ts`);
+
+    if (!existsSync(translationPath)) {
+      continue;
+    }
+
+    let content = readFileSync(translationPath, 'utf-8');
+
+    // Add nav translation if not exists
+    if (!content.includes(`${routeId}:`)) {
+      // Find the nav section and add the key
+      const navSectionMatch = content.match(/nav:\s*\{([^}]+)\}/);
+      if (navSectionMatch) {
+        const navSection = navSectionMatch[0];
+        const insertPoint = navSection.lastIndexOf('}');
+        const newNavSection =
+          navSection.slice(0, insertPoint) +
+          `    ${routeId}: '${title}',\n  ` +
+          navSection.slice(insertPoint);
+        content = content.replace(navSection, newNavSection);
+      }
+    }
+
+    // Add page-specific translations if not exists
+    const pageKeyPattern = new RegExp(`^\\s*${routeId}:\\s*\\{`, 'm');
+    if (!pageKeyPattern.test(content)) {
+      // Find a good insertion point (before the closing export)
+      const insertPoint = content.lastIndexOf('} as const');
+      if (insertPoint !== -1) {
+        const pageTranslations = `
+  // ${title} page
+  ${routeId}: {
+    title: '${title}',
+    description: 'Add your ${title.toLowerCase()} page description here.',
+  },
+
+`;
+        content = content.slice(0, insertPoint) + pageTranslations + content.slice(insertPoint);
+      }
+    }
+
+    writeFileSync(translationPath, content);
+  }
 }
 
 /**
@@ -174,12 +305,17 @@ export async function generatePages(
     mkdirSync(pagesDir, { recursive: true });
   }
 
-  // Generate standard pages
+  // Generate standard pages (English / default locale)
   for (const pageName of pages) {
     const filePath = join(pagesDir, `${pageName}.astro`);
     const template = generatePageTemplate(pageName, layout);
     writeFileSync(filePath, template);
     generatedFiles.push(`src/pages/${pageName}.astro`);
+
+    // Add route entry to base routes.ts (for non-i18n nav)
+    if (!isI18n) {
+      addBaseRouteEntry(targetDir, pageName);
+    }
   }
 
   // Generate i18n pages if enabled
@@ -197,8 +333,8 @@ export async function generatePages(
       writeFileSync(filePath, template);
       generatedFiles.push(`src/pages/[lang]/[...${routeId}].astro`);
 
-      // Add route entry to routes.ts
-      addRouteEntry(targetDir, pageName);
+      // Add route entry to i18n routes.ts
+      addI18nRouteEntry(targetDir, pageName);
     }
   }
 
