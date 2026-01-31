@@ -1,17 +1,17 @@
 {
   "name": "create-velocity-astro",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Create Velocity - A CLI to scaffold production-ready Astro 6 + Tailwind v4 projects",
   "type": "module",
   "license": "MIT",
   "author": "Southwell Media <info@southwellmedia.com>",
-  "homepage": "https://github.com/southwellmedia-dev/velocity#readme",
+  "homepage": "https://github.com/southwellmedia/create-velocity-astro#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/southwellmedia-dev/velocity.git"
+    "url": "git+https://github.com/southwellmedia/create-velocity-astro.git"
   },
   "bugs": {
-    "url": "https://github.com/southwellmedia-dev/velocity/issues"
+    "url": "https://github.com/southwellmedia/create-velocity-astro/issues"
   },
   "keywords": [
     "create",

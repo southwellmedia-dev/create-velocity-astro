@@ -11,7 +11,7 @@ import { showSuccess, showWarning } from './prompts.js';
 import { generatePages } from './features/pages.js';
 
 // GitHub repository for the Velocity template
-const TEMPLATE_REPO = 'github:southwellmedia-dev/velocity';
+const TEMPLATE_REPO = 'github:southwellmedia/velocity';
 
 // Files/directories to remove after download
 const CLEANUP_ITEMS = [
