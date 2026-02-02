@@ -100,7 +100,7 @@ const t = useTranslations(locale);
 // Get navigation items from i18n routes or custom nav
 const defaultNav = getNavRoutes(locale);
 const navItems: NavItem[] = nav || defaultNav.map(route => ({
-  label: route.label,
+  label: t(route.label as any) || route.label,
   href: route.path,
 }));
 

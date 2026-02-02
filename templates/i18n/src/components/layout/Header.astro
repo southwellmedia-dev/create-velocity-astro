@@ -111,7 +111,7 @@ const isInvert = colorScheme === 'invert';
 // Get navigation items from i18n routes or custom nav
 const defaultNav = getNavRoutes(locale);
 const navItems: NavItem[] = nav || [...extraNav, ...defaultNav.map(route => ({
-  label: route.label,
+  label: t(route.label as any) || route.label,
   href: route.path,
 }))];
 

@@ -241,29 +241,32 @@ export type NavRoute = {
   routeId: RouteId;
   label: string;
   order: number;
+  path: string;
 };
 
 /**
  * Get routes that should appear in navigation, sorted by order
  *
- * @returns Array of navigation routes with their translation keys
+ * @param locale - The locale to get paths for (defaults to defaultLocale)
+ * @returns Array of navigation routes with their translation keys and localized paths
  *
  * @example
- * const navRoutes = getNavRoutes();
+ * const navRoutes = getNavRoutes('en');
  * // → [
- * //   { routeId: 'components', label: 'nav.components', order: 1 },
- * //   { routeId: 'blog', label: 'nav.blog', order: 2 },
- * //   { routeId: 'about', label: 'nav.about', order: 3 },
- * //   { routeId: 'contact', label: 'nav.contact', order: 4 },
+ * //   { routeId: 'components', label: 'nav.components', order: 1, path: '/components' },
+ * //   { routeId: 'blog', label: 'nav.blog', order: 2, path: '/blog' },
+ * //   { routeId: 'about', label: 'nav.about', order: 3, path: '/about' },
+ * //   { routeId: 'contact', label: 'nav.contact', order: 4, path: '/contact' },
  * // ]
  */
-export function getNavRoutes(): NavRoute[] {
+export function getNavRoutes(locale: Locale = defaultLocale): NavRoute[] {
   return Object.entries(routes)
     .filter(([_, route]) => route.nav?.show === true)
     .map(([routeId, route]) => ({
       routeId: routeId as RouteId,
       label: route.nav!.label,
       order: route.nav!.order,
+      path: getLocalizedPath(routeId as RouteId, locale),
     }))
     .sort((a, b) => a.order - b.order);
 }
