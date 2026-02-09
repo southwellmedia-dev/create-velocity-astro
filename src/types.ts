@@ -35,3 +35,48 @@ export interface PromptAnswers {
   pageLayout: PageLayout;
   packageManager: PackageManager;
 }
+
+export interface VelocityConfig {
+  version: string;
+  createdAt: string;
+  updatedAt: string;
+  features: {
+    demo: boolean;
+    i18n: boolean;
+    components: string;
+  };
+}
+
+export interface UpgradeManifest {
+  version: string;
+  minCliVersion: string;
+  files: {
+    safe: string[];
+    protected: string[];
+  };
+  dependencies: {
+    update: Record<string, string>;
+    remove: string[];
+    add: Record<string, string>;
+  };
+  migrations: MigrationStep[];
+}
+
+export interface MigrationStep {
+  title: string;
+  description: string;
+  pattern?: string;
+  searchPaths?: string[];
+}
+
+export interface UpgradeOptions {
+  targetDir: string;
+  dryRun: boolean;
+  yes: boolean;
+}
+
+export interface FileDiff {
+  path: string;
+  status: 'added' | 'modified' | 'unchanged' | 'removed';
+  category: 'safe' | 'protected';
+}

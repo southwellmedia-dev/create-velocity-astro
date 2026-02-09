@@ -1,0 +1,413 @@
+import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { join, dirname, relative } from 'node:path';
+import { tmpdir } from 'node:os';
+import * as p from '@clack/prompts';
+import pc from 'picocolors';
+import { downloadTemplate } from 'giget';
+import type { UpgradeOptions, UpgradeManifest, MigrationStep } from './types.js';
+import { readVelocityConfig, writeVelocityConfig } from './utils/velocity-config.js';
+import { readJson } from './utils/fs.js';
+import { diffProjects, summarizeDiffs } from './utils/diff.js';
+import {
+  showUpgradeIntro,
+  showChangeSummary,
+  confirmUpgrade,
+  showManualSteps,
+  showUpgradeOutro,
+  warnDirtyGit,
+} from './upgrade-prompts.js';
+
+const TEMPLATE_REPO = 'github:southwellmedia/velocity';
+const CLI_VERSION = '1.6.0';
+
+// Hardcoded fallback safe list if manifest is missing from template
+const FALLBACK_SAFE_FILES = [
+  'src/components/ui/',
+  'src/components/seo/',
+  'src/components/layout/',
+  'src/layouts/',
+  'src/lib/',
+  'src/styles/tokens/',
+  'src/styles/global.css',
+  'src/content.config.ts',
+  'tsconfig.json',
+  'eslint.config.js',
+  '.prettierrc',
+  '.prettierignore',
+];
+
+/**
+ * Checks if the project has uncommitted git changes.
+ */
+function hasUncommittedChanges(targetDir: string): boolean {
+  try {
+    const result = execSync('git status --porcelain', {
+      cwd: targetDir,
+      encoding: 'utf-8',
+    });
+    return result.trim().length > 0;
+  } catch {
+    // Not a git repo or git not available — skip the check
+    return false;
+  }
+}
+
+/**
+ * Compares two semver-like version strings.
+ * Returns true if `current` < `required`.
+ */
+function isVersionLessThan(current: string, required: string): boolean {
+  const parse = (v: string) =>
+    v.replace(/^v/, '').split(/[-.]/).map((p) => {
+      const n = parseInt(p, 10);
+      return isNaN(n) ? 0 : n;
+    });
+
+  const a = parse(current);
+  const b = parse(required);
+  const len = Math.max(a.length, b.length);
+
+  for (let i = 0; i < len; i++) {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    if (av < bv) return true;
+    if (av > bv) return false;
+  }
+  return false;
+}
+
+/**
+ * Scans user files for migration patterns and returns matches.
+ */
+function scanForMigrationPatterns(
+  targetDir: string,
+  migrations: MigrationStep[]
+): Map<string, string[]> {
+  const results = new Map<string, string[]>();
+
+  for (const migration of migrations) {
+    if (!migration.pattern) {
+      results.set(migration.title, []);
+      continue;
+    }
+
+    const regex = new RegExp(migration.pattern);
+    const matches: string[] = [];
+
+    // Determine search paths
+    const searchPaths = migration.searchPaths?.length
+      ? migration.searchPaths
+      : ['src/'];
+
+    for (const searchPath of searchPaths) {
+      const fullPath = join(targetDir, searchPath);
+      if (!existsSync(fullPath)) continue;
+
+      const files = walkFiles(fullPath);
+      for (const file of files) {
+        try {
+          const content = readFileSync(file, 'utf-8');
+          if (regex.test(content)) {
+            matches.push(relative(targetDir, file));
+          }
+        } catch {
+          // Skip unreadable files
+        }
+      }
+    }
+
+    results.set(migration.title, matches);
+  }
+
+  return results;
+}
+
+/**
+ * Recursively walks a directory and returns all file paths.
+ */
+function walkFiles(dir: string): string[] {
+  const results: string[] = [];
+  if (!existsSync(dir)) return results;
+
+  const stat = statSync(dir);
+  if (!stat.isDirectory()) {
+    return [dir];
+  }
+
+  const entries = readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      // Skip node_modules and .git
+      if (entry.name === 'node_modules' || entry.name === '.git') continue;
+      results.push(...walkFiles(fullPath));
+    } else {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+/**
+ * Merges dependency changes into the project's package.json.
+ */
+function mergePackageJsonDeps(
+  targetDir: string,
+  manifest: UpgradeManifest
+): void {
+  const pkgPath = join(targetDir, 'package.json');
+  if (!existsSync(pkgPath)) return;
+
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+
+  // Update dependencies
+  for (const [name, version] of Object.entries(manifest.dependencies.update)) {
+    if (pkg.dependencies?.[name] !== undefined) {
+      pkg.dependencies[name] = version;
+    } else if (pkg.devDependencies?.[name] !== undefined) {
+      pkg.devDependencies[name] = version;
+    } else {
+      // Default to dependencies
+      if (!pkg.dependencies) pkg.dependencies = {};
+      pkg.dependencies[name] = version;
+    }
+  }
+
+  // Remove dependencies
+  for (const name of manifest.dependencies.remove) {
+    if (pkg.dependencies?.[name] !== undefined) {
+      delete pkg.dependencies[name];
+    }
+    if (pkg.devDependencies?.[name] !== undefined) {
+      delete pkg.devDependencies[name];
+    }
+  }
+
+  // Add new dependencies
+  for (const [name, version] of Object.entries(manifest.dependencies.add)) {
+    if (!pkg.dependencies) pkg.dependencies = {};
+    pkg.dependencies[name] = version;
+  }
+
+  writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+}
+
+/**
+ * Main upgrade orchestration function.
+ */
+export async function upgrade(options: UpgradeOptions): Promise<void> {
+  const { targetDir, dryRun, yes } = options;
+
+  // 1. Read .velocity.json
+  const config = readVelocityConfig(targetDir);
+  if (!config) {
+    p.log.error(
+      pc.red(
+        "This doesn't appear to be a Velocity project.\n" +
+        'Run this command from a project created with create-velocity-astro.'
+      )
+    );
+    process.exit(1);
+  }
+
+  // Check for dirty git state
+  if (hasUncommittedChanges(targetDir)) {
+    const proceed = await warnDirtyGit(yes);
+    if (!proceed) return;
+  }
+
+  // 2. Download latest template to temp dir
+  const spinner = p.spinner();
+  spinner.start('Downloading latest template...');
+
+  const tempDir = join(tmpdir(), `velocity-upgrade-${Date.now()}`);
+
+  try {
+    await downloadTemplate(TEMPLATE_REPO, {
+      dir: tempDir,
+      force: true,
+    });
+    spinner.stop('Template downloaded');
+  } catch (error) {
+    spinner.stop('Failed to download template');
+    p.log.error(
+      pc.red(
+        'Could not download template. Check your internet connection.\n' +
+        (error instanceof Error ? error.message : '')
+      )
+    );
+    cleanup(tempDir);
+    process.exit(1);
+  }
+
+  // 3. Read velocity-manifest.json from fresh template
+  let manifest: UpgradeManifest;
+  const manifestPath = join(tempDir, 'velocity-manifest.json');
+
+  if (existsSync(manifestPath)) {
+    manifest = readJson<UpgradeManifest>(manifestPath);
+  } else {
+    // Fallback: use hardcoded safe list
+    p.log.warn(pc.yellow('Manifest not found in template. Using fallback file list.'));
+
+    // Try to read version from template's package.json
+    let templateVersion = config.version;
+    const templatePkgPath = join(tempDir, 'package.json');
+    if (existsSync(templatePkgPath)) {
+      const templatePkg = readJson<{ version?: string }>(templatePkgPath);
+      if (templatePkg.version) {
+        templateVersion = templatePkg.version;
+      }
+    }
+
+    manifest = {
+      version: templateVersion,
+      minCliVersion: '1.0.0',
+      files: {
+        safe: FALLBACK_SAFE_FILES,
+        protected: [],
+      },
+      dependencies: {
+        update: {},
+        remove: [],
+        add: {},
+      },
+      migrations: [],
+    };
+  }
+
+  // Check CLI version requirement
+  if (isVersionLessThan(CLI_VERSION, manifest.minCliVersion)) {
+    p.log.error(
+      pc.red(
+        `This upgrade requires create-velocity-astro >= ${manifest.minCliVersion}.\n` +
+        'Run `npm update -g create-velocity-astro` to update.'
+      )
+    );
+    cleanup(tempDir);
+    process.exit(1);
+  }
+
+  // Check if already on latest version
+  if (config.version === manifest.version) {
+    showUpgradeIntro(config.version, manifest.version);
+    p.log.info(pc.green(`Already on v${manifest.version}. Nothing to upgrade.`));
+    p.outro('');
+    cleanup(tempDir);
+    return;
+  }
+
+  // 4. Diff safe files
+  const diffs = diffProjects(targetDir, tempDir, manifest);
+  const { added, modified } = summarizeDiffs(diffs);
+
+  // If no changes at all
+  if (added === 0 && modified === 0 &&
+      Object.keys(manifest.dependencies.update).length === 0 &&
+      manifest.dependencies.remove.length === 0 &&
+      Object.keys(manifest.dependencies.add).length === 0) {
+    showUpgradeIntro(config.version, manifest.version);
+    p.log.info(pc.green('All files are up to date. Updating version marker only.'));
+    if (!dryRun) {
+      writeVelocityConfig(targetDir, {
+        ...config,
+        version: manifest.version,
+        updatedAt: new Date().toISOString().slice(0, 10),
+      });
+    }
+    p.outro('');
+    cleanup(tempDir);
+    return;
+  }
+
+  // 5. Show summary and confirm
+  showUpgradeIntro(config.version, manifest.version);
+  showChangeSummary(diffs, manifest);
+
+  const shouldProceed = await confirmUpgrade(dryRun);
+
+  if (dryRun) {
+    // In dry-run mode, still show manual migration steps
+    const matchResults = scanForMigrationPatterns(targetDir, manifest.migrations);
+    showManualSteps(manifest.migrations, matchResults);
+    p.outro(pc.dim('Dry run complete. No changes were made.'));
+    cleanup(tempDir);
+    return;
+  }
+
+  if (!shouldProceed) {
+    cleanup(tempDir);
+    return;
+  }
+
+  // 6. Apply changes
+  spinner.start('Applying changes...');
+
+  // 6a. Copy modified/added safe files
+  const changedDiffs = diffs.filter((d) => d.status === 'added' || d.status === 'modified');
+  for (const diff of changedDiffs) {
+    const src = join(tempDir, diff.path);
+    const dest = join(targetDir, diff.path);
+    const destDir = dirname(dest);
+
+    if (!existsSync(destDir)) {
+      mkdirSync(destDir, { recursive: true });
+    }
+
+    copyFileSync(src, dest);
+  }
+
+  // 6b. Merge package.json dependencies
+  const hasDepChanges =
+    Object.keys(manifest.dependencies.update).length > 0 ||
+    manifest.dependencies.remove.length > 0 ||
+    Object.keys(manifest.dependencies.add).length > 0;
+
+  if (hasDepChanges) {
+    mergePackageJsonDeps(targetDir, manifest);
+  }
+
+  // 6c. Update .velocity.json
+  writeVelocityConfig(targetDir, {
+    ...config,
+    version: manifest.version,
+    updatedAt: new Date().toISOString().slice(0, 10),
+  });
+
+  spinner.stop('Changes applied');
+
+  // Report results
+  if (modified > 0) {
+    p.log.success(pc.green(`Updated ${modified} framework file${modified !== 1 ? 's' : ''}`));
+  }
+  if (added > 0) {
+    p.log.success(pc.green(`Added ${added} new file${added !== 1 ? 's' : ''}`));
+  }
+  if (hasDepChanges) {
+    p.log.success(pc.green('Updated package.json dependencies'));
+  }
+  p.log.success(pc.green('Updated .velocity.json'));
+
+  // 7. Scan for migration patterns and show manual steps
+  const matchResults = scanForMigrationPatterns(targetDir, manifest.migrations);
+  showManualSteps(manifest.migrations, matchResults);
+
+  // 8. Show outro
+  showUpgradeOutro(hasDepChanges);
+
+  cleanup(tempDir);
+}
+
+/**
+ * Cleans up temporary directory.
+ */
+function cleanup(tempDir: string): void {
+  try {
+    if (existsSync(tempDir)) {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  } catch {
+    // Ignore cleanup errors
+  }
+}

@@ -1,6 +1,10 @@
-# create-velocity-astro
+<p align="center">
+  <img src="https://docs.deployvelocity.com/_astro/logo-full.DPIHOUPD.svg" alt="Velocity" width="320" />
+</p>
 
-Scaffold production-ready [Velocity](https://github.com/southwellmedia/velocity) projects in seconds.
+<h1 align="center">create-velocity-astro</h1>
+
+<p align="center">Scaffold and upgrade production-ready <a href="https://github.com/southwellmedia/velocity">Velocity</a> projects in seconds.</p>
 
 Velocity is an opinionated Astro 6 + Tailwind CSS v4 starter kit with 27+ components, i18n support, SEO optimization, and deployment-ready configuration.
 
@@ -20,14 +24,40 @@ yarn create velocity-astro my-site
 bun create velocity-astro my-site
 ```
 
+## Upgrade an Existing Project
+
+Already have a Velocity project? Upgrade to the latest version:
+
+```bash
+# Preview what will change (no files modified)
+pnpm create velocity-astro upgrade --dry-run
+
+# Run the upgrade
+pnpm create velocity-astro upgrade
+
+# Skip confirmation prompts
+pnpm create velocity-astro upgrade --yes
+```
+
+The upgrade command will:
+
+1. **Replace framework files** — UI components, layouts, utilities, and config files are updated to the latest version
+2. **Update dependencies** — `package.json` is merged with new dependency versions (your custom fields are preserved)
+3. **Protect your files** — Pages, content, site config, and customized components are never touched
+4. **Show manual migration steps** — Breaking changes are listed with affected files so you know exactly what to update
+
+> Requires a project created with `create-velocity-astro` v1.6.0+ (which writes a `.velocity.json` tracking file).
+
 ## CLI Options
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
+| `upgrade` | command | - | Upgrade an existing Velocity project |
 | `--demo` | boolean | prompt | Include demo landing page and sample content |
 | `--components` | string | prompt | Component selection (see below) |
 | `--i18n` | boolean | prompt | Add internationalization support |
 | `--pages` | boolean | false | Generate starter pages interactively |
+| `--dry-run` | boolean | false | Preview upgrade changes without applying |
 | `-y, --yes` | boolean | false | Skip prompts, use defaults |
 | `-h, --help` | - | - | Show help message |
 | `-v, --version` | - | - | Show version number |
