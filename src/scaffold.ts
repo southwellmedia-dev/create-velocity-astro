@@ -12,6 +12,8 @@ import { showSuccess, showWarning } from './prompts.js';
 import { generatePages } from './features/pages.js';
 import { fetchRegistry } from './registry/fetcher.js';
 import { resolveDependencies } from './registry/resolver.js';
+import { createInitialConfig, writeVelocityConfig } from './utils/velocity-config.js';
+import { readJson } from './utils/fs.js';
 
 // GitHub repository for the Velocity template
 const TEMPLATE_REPO = 'github:southwellmedia/velocity';
@@ -321,6 +323,26 @@ export async function scaffold(options: ScaffoldOptions): Promise<void> {
   } catch (error) {
     spinner.stop('Failed to configure project');
     throw error;
+  }
+
+  // Step 6.5: Write .velocity.json
+  try {
+    let templateVersion = '0.1.0-beta';
+    const manifestPath = join(targetDir, 'velocity-manifest.json');
+    const pkgPath = join(targetDir, 'package.json');
+
+    if (existsSync(manifestPath)) {
+      const manifest = readJson<{ version?: string }>(manifestPath);
+      if (manifest.version) templateVersion = manifest.version;
+    } else if (existsSync(pkgPath)) {
+      const pkg = readJson<{ version?: string }>(pkgPath);
+      if (pkg.version) templateVersion = pkg.version;
+    }
+
+    const velocityConfig = createInitialConfig(options, templateVersion);
+    writeVelocityConfig(targetDir, velocityConfig);
+  } catch {
+    // Non-fatal — project still usable without .velocity.json
   }
 
   // Step 7: Initialize git

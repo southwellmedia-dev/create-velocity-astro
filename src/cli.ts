@@ -7,17 +7,21 @@ import type { CliOptions } from './types.js';
 import type { ComponentSelection } from './registry/types.js';
 import { runPrompts, showIntro, showOutro, showError } from './prompts.js';
 import { scaffold } from './scaffold.js';
+import { upgrade } from './upgrade.js';
 import { isEmptyDir } from './utils/fs.js';
 import { toValidProjectName } from './utils/validate.js';
 
 const HELP_TEXT = `
-${pc.bold('create-velocity-astro')} - Create a new Velocity project
+${pc.bold('create-velocity-astro')} - Create and upgrade Velocity projects
 
 ${pc.bold('Usage:')}
   npm create velocity-astro@latest [project-name] [options]
   pnpm create velocity-astro [project-name] [options]
-  yarn create velocity-astro [project-name] [options]
-  bun create velocity-astro [project-name] [options]
+
+${pc.bold('Commands:')}
+  ${pc.cyan('upgrade')}             Upgrade an existing Velocity project to the latest version
+    --dry-run           Preview changes without applying them
+    --yes, -y           Skip confirmation prompts
 
 ${pc.bold('Options:')}
   --demo              Include demo landing page and sample content
@@ -39,12 +43,14 @@ ${pc.bold('Examples:')}
   npm create velocity-astro@latest my-site
   npm create velocity-astro@latest my-site --demo --components
   npm create velocity-astro@latest my-site --components=ui,patterns
-  npm create velocity-astro@latest my-site --components=none
-  npm create velocity-astro@latest my-site --i18n --pages
   pnpm create velocity-astro my-site -y
+
+  ${pc.dim('# Upgrade an existing project')}
+  pnpm create velocity-astro upgrade
+  pnpm create velocity-astro upgrade --dry-run
 `;
 
-const VERSION = '1.4.2';
+const VERSION = '1.6.1';
 
 /**
  * Parses the --components flag into a ComponentSelection
@@ -89,7 +95,7 @@ function parseComponentsFlag(value: string | boolean | undefined): ComponentSele
 
 export async function run(argv: string[]): Promise<void> {
   const args = mri<CliOptions>(argv, {
-    boolean: ['demo', 'i18n', 'pages', 'help', 'version', 'yes'],
+    boolean: ['demo', 'i18n', 'pages', 'help', 'version', 'yes', 'dry-run'],
     string: ['components'],
     alias: {
       h: 'help',
@@ -107,6 +113,18 @@ export async function run(argv: string[]): Promise<void> {
   // Handle version
   if (args.version) {
     console.log(VERSION);
+    return;
+  }
+
+  // Handle upgrade subcommand
+  const subcommand = args._[0] as string | undefined;
+  if (subcommand === 'upgrade') {
+    const targetDir = resolve(process.cwd());
+    await upgrade({
+      targetDir,
+      dryRun: (args as unknown as Record<string, unknown>)['dry-run'] as boolean || false,
+      yes: args.yes || false,
+    });
     return;
   }
 
