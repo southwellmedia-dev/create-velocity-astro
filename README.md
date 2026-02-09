@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://docs.deployvelocity.com/_astro/logo-full.DPIHOUPD.svg" alt="Velocity" width="320" />
+  <img src=".github/logo.svg" alt="Velocity" width="320" />
 </p>
 
 <h1 align="center">create-velocity-astro</h1>
