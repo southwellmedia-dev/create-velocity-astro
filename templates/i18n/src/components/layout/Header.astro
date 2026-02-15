@@ -20,9 +20,9 @@
  */
 import type { HTMLAttributes } from 'astro/types';
 import { cn } from '@/lib/cn';
-import Button from '@/components/ui/Button.astro';
-import Icon from '@/components/ui/Icon.astro';
-import Logo from '@/components/ui/Logo.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import Logo from '@/components/ui/marketing/Logo/Logo.astro';
 import ThemeToggle from '@/components/layout/ThemeToggle.astro';
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher.astro';
 import siteConfig from '@/config/site.config';
@@ -219,7 +219,7 @@ const buttonId = `${menuId}-button`;
               href={href.startsWith('#') && !isLandingPage ? `/${href}` : href}
               class={cn(
                 'nav-link px-3 py-2 text-sm rounded-md',
-                'transition-all duration-[--transition-fast]',
+                'transition-all duration-(--transition-fast)',
                 isActive(href)
                   ? cn('nav-link-active font-semibold', isInvert ? 'text-on-invert bg-white/10' : 'text-foreground bg-secondary')
                   : cn('nav-link-inactive font-medium', isInvert ? 'text-on-invert-secondary hover:text-on-invert hover:bg-white/10' : 'text-foreground-muted hover:text-foreground hover:bg-secondary/70')
@@ -317,7 +317,7 @@ const buttonId = `${menuId}-button`;
               href={href.startsWith('#') && !isLandingPage ? `/${href}` : href}
               class={cn(
                 'mobile-nav-link block px-3 py-2 rounded-md text-sm',
-                'transition-all duration-[--transition-fast]',
+                'transition-all duration-(--transition-fast)',
                 isActive(href)
                   ? 'mobile-nav-link-active font-semibold bg-secondary text-foreground'
                   : 'mobile-nav-link-inactive font-medium text-foreground-muted hover:bg-secondary/70 hover:text-foreground'
