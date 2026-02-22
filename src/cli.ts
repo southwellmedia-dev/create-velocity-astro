@@ -11,6 +11,8 @@ import { upgrade } from './upgrade.js';
 import { isEmptyDir } from './utils/fs.js';
 import { toValidProjectName } from './utils/validate.js';
 
+declare const CLI_VERSION: string;
+
 const HELP_TEXT = `
 ${pc.bold('create-velocity-astro')} - Create and upgrade Velocity projects
 
@@ -50,7 +52,7 @@ ${pc.bold('Examples:')}
   pnpm create velocity-astro upgrade --dry-run
 `;
 
-const VERSION = '1.6.1';
+const VERSION = CLI_VERSION;
 
 /**
  * Parses the --components flag into a ComponentSelection

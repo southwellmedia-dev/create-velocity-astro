@@ -18,8 +18,9 @@ import {
   warnDirtyGit,
 } from './upgrade-prompts.js';
 
+declare const CLI_VERSION: string;
+
 const TEMPLATE_REPO = 'github:southwellmedia/velocity';
-const CLI_VERSION = '1.6.0';
 
 // Hardcoded fallback safe list if manifest is missing from template
 const FALLBACK_SAFE_FILES = [
