@@ -44,45 +44,37 @@ function getNextNavOrder(content: string): number {
 }
 
 /**
- * Adds a new route entry to base routes.ts (non-i18n projects)
- * Includes nav config so the page appears in navigation
+ * Adds a new nav entry to nav.config.ts (non-i18n projects)
+ * So the generated page appears in site navigation
  */
-function addBaseRouteEntry(targetDir: string, pageName: string): void {
-  const routesPath = join(targetDir, 'src', 'config', 'routes.ts');
+function addNavEntry(targetDir: string, pageName: string): void {
+  const navConfigPath = join(targetDir, 'src', 'config', 'nav.config.ts');
 
-  if (!existsSync(routesPath)) {
-    return; // routes.ts doesn't exist, skip
+  if (!existsSync(navConfigPath)) {
+    return; // nav.config.ts doesn't exist, skip
   }
 
-  const routeId = toRouteId(pageName);
   const title = toTitle(pageName);
-  const content = readFileSync(routesPath, 'utf-8');
+  const content = readFileSync(navConfigPath, 'utf-8');
 
-  // Check if route already exists
-  if (content.includes(`${routeId}:`)) {
-    return; // Route already defined
-  }
-
-  // Find the closing of routes object (before "} as const satisfies")
-  const insertPoint = content.indexOf('} as const satisfies');
-  if (insertPoint === -1) {
-    return; // Can't find insertion point
+  // Check if entry already exists
+  if (content.includes(`href: '/${pageName}'`)) {
+    return; // Nav entry already defined
   }
 
   // Calculate the next nav order
   const navOrder = getNextNavOrder(content);
 
-  // Create new route entry with nav config
-  const newRoute = `
-  // Custom page: ${pageName}
-  ${routeId}: {
-    path: '/${pageName}',
-    nav: { show: true, order: ${navOrder}, label: '${title}' },
-  },
-`;
+  // Find the closing bracket of the navItems array
+  const insertPoint = content.indexOf('];');
+  if (insertPoint === -1) {
+    return; // Can't find insertion point
+  }
 
-  const newContent = content.slice(0, insertPoint) + newRoute + content.slice(insertPoint);
-  writeFileSync(routesPath, newContent);
+  const newEntry = `  { label: '${title}', href: '/${pageName}', order: ${navOrder} },\n`;
+
+  const newContent = content.slice(0, insertPoint) + newEntry + content.slice(insertPoint);
+  writeFileSync(navConfigPath, newContent);
 }
 
 /**
@@ -312,9 +304,9 @@ export async function generatePages(
     writeFileSync(filePath, template);
     generatedFiles.push(`src/pages/${pageName}.astro`);
 
-    // Add route entry to base routes.ts (for non-i18n nav)
+    // Add nav entry to nav.config.ts (for non-i18n nav)
     if (!isI18n) {
-      addBaseRouteEntry(targetDir, pageName);
+      addNavEntry(targetDir, pageName);
     }
   }
 
